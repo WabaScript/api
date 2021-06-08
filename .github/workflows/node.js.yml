@@ -15,8 +15,8 @@ jobs:
       DB_HOST: localhost
       DB_PORT: 5432
       DB_DATABASE: aurora
-      DB_USERNAME: root
-      DB_PASSWORD: password
+      DB_USERNAME: aurora
+      DB_PASSWORD: aurora
       DB_SSL: false
       JWT_SECRET: dummybroh
 

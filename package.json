@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bookshelf": "^1.2.0",
     "fastify": "^3.17.0",
+    "knex": "^0.95.6",
     "pg": "^8.6.0"
   },
   "devDependencies": {

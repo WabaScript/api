@@ -1,10 +1,18 @@
-const { dbInstance } = require("../lib/dbInstance");
+const { Website } = require("../lib/models/Website");
+const { User } = require("../lib/models/User");
+const { Browser } = require("../lib/models/Browser");
 
 const admin = (fastify, _, done) => {
   fastify.get("/websites", async () => {
-    const { rows } = await dbInstance.query("SELECT * FROM websites");
+    return await new Website().fetchAll({ withRelated: ["user"] });
+  });
 
-    return rows;
+  fastify.get("/users", async () => {
+    return await new User().fetchAll();
+  });
+
+  fastify.get("/browsers", async () => {
+    return await new Browser().fetchAll();
   });
 
   done();

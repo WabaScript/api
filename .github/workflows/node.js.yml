@@ -16,7 +16,7 @@ jobs:
       DB_PORT: 5432
       DB_DATABASE: aurora
       DB_USERNAME: aurora
-      DB_PASSWORD: aurora
+      DB_PASSWORD: postgres
       DB_SSL: false
       JWT_SECRET: dummybroh
 

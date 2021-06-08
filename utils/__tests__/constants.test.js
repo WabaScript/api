@@ -2,7 +2,7 @@ const { AUTH_COOKIE, AUTH_COOKIE_LIFETIME } = require("../constants");
 
 describe("Testing AUTH_COOKIE", () => {
   it("has correct value", () => {
-    expect(AUTH_COOKIE).toBe("aurora_mp");
+    expect(AUTH_COOKIE).toBe("aurora_cookie");
   });
 });
 

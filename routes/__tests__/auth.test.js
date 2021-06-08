@@ -1,17 +1,11 @@
 const { build } = require("../../app.js");
+const { dbInstance } = require("../../lib/dbInstance");
 
-let app;
-
-beforeEach(async () => {
-  app = await build();
-});
-
-afterEach(async () => {
-  await app.close();
-});
+afterAll(async () => await dbInstance.knex.destroy());
 
 describe("login", () => {
   it("does not login", async () => {
+    const app = await build();
     const response = await app.inject({
       method: "POST",
       url: "/v2/auth/login",
@@ -28,6 +22,7 @@ describe("login", () => {
   });
 
   it("does login", async () => {
+    const app = await build();
     const response = await app.inject({
       method: "POST",
       url: "/v2/auth/login",
@@ -44,6 +39,7 @@ describe("login", () => {
 
 describe("logout", () => {
   it("does logout", async () => {
+    const app = await build();
     const response = await app.inject({
       method: "POST",
       url: "/v2/auth/logout",

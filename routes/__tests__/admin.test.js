@@ -1,18 +1,12 @@
 const { build } = require("../../app.js");
 const { user, website, browser } = require("../../jest/schema.js");
+const { dbInstance } = require("../../lib/dbInstance");
 
-let app;
-
-beforeEach(async () => {
-  app = await build();
-});
-
-afterEach(async () => {
-  await app.close();
-});
+afterAll(async () => await dbInstance.knex.destroy());
 
 describe("api v2", () => {
   it.skip("show the websites list", async () => {
+    const app = await build();
     const response = await app.inject({
       method: "GET",
       url: "/v2/websites",
@@ -27,6 +21,7 @@ describe("api v2", () => {
   });
 
   it.skip("show the users list", async () => {
+    const app = await build();
     const response = await app.inject({
       method: "GET",
       url: "/v2/users",
@@ -38,6 +33,7 @@ describe("api v2", () => {
   });
 
   it.skip("show the browsers list", async () => {
+    const app = await build();
     const response = await app.inject({
       method: "GET",
       url: "/v2/browsers",

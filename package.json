@@ -7,7 +7,7 @@
     "db:seed": "knex seed:run",
     "migrate": "knex migrate:latest",
     "migrate:refresh": "knex migrate:rollback --all && knex migrate:latest",
-    "test": "jest --coverage --detectOpenHandles"
+    "test": "jest --coverage"
   },
   "keywords": [],
   "author": "",

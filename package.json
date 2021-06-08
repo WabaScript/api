@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "db:seed": "knex seed:run",
+    "migrate": "knex migrate:latest",
+    "migrate:refresh": "knex migrate:rollback --all && knex migrate:latest",
     "test": "jest --detectOpenHandles"
   },
   "keywords": [],

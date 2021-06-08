@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const fastify = require("fastify");
 const { debug } = require("./routes/debug.js");
 const { admin } = require("./routes/admin.js");

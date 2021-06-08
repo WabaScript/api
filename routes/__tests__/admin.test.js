@@ -1,9 +1,18 @@
 const { build } = require("../../app.js");
 const { user, website, browser } = require("../../jest/schema.js");
 
+let app;
+
+beforeEach(async () => {
+  app = await build();
+});
+
+afterEach(async () => {
+  await app.close();
+});
+
 describe("api v2", () => {
-  it("show the websites list", async () => {
-    const app = build();
+  it.skip("show the websites list", async () => {
     const response = await app.inject({
       method: "GET",
       url: "/v2/websites",
@@ -17,8 +26,7 @@ describe("api v2", () => {
     });
   });
 
-  it("show the users list", async () => {
-    const app = build();
+  it.skip("show the users list", async () => {
     const response = await app.inject({
       method: "GET",
       url: "/v2/users",
@@ -29,8 +37,7 @@ describe("api v2", () => {
     expect(JSON.parse(response.body)[0]).toMatchObject(user);
   });
 
-  it("show the browsers list", async () => {
-    const app = build();
+  it.skip("show the browsers list", async () => {
     const response = await app.inject({
       method: "GET",
       url: "/v2/browsers",

@@ -1,7 +1,16 @@
 const { build } = require("../../app.js");
 
+let app;
+
+beforeEach(async () => {
+  app = await build();
+});
+
+afterEach(async () => {
+  await app.close();
+});
+
 it("home info is going fine", async () => {
-  const app = build();
   const response = await app.inject({
     method: "GET",
     url: "/",
@@ -13,7 +22,6 @@ it("home info is going fine", async () => {
 });
 
 it("healthcheck is going fine", async () => {
-  const app = build();
   const response = await app.inject({
     method: "GET",
     url: "/healthcheck",

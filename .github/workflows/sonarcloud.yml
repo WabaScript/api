@@ -41,6 +41,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Use Node.js 14
         uses: actions/setup-node@v2
         with:
@@ -50,11 +52,6 @@ jobs:
       - run: npm run migrate
       - run: npm run db:seed
       - run: npm test
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:

@@ -1,14 +1,15 @@
 const { User } = require("../lib/models/User");
-const { Browser } = require("../lib/models/Browser");
+const { updateMeSchema } = require("./schema/me");
+const { hash } = require("../utils/hash");
 
 const me = (fastify, _, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
 
-  fastify.get("/", async (request, _) => {
+  fastify.get("/", async (request, _reply) => {
     return request.user.data;
   });
 
-  fastify.put("/", async (request, _) => {
+  fastify.put("/", { updateMeSchema }, async (request, _reply) => {
     const user = request.user.data;
     const { firstname, lastname, email, password } = request.body;
 

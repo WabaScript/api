@@ -13,7 +13,7 @@
 
 <br/>
 
-# Why an API Project?
+# NB: This is under development. For the current version, please have a look to [this](https://github.com/useaurora/aurora)
 
 The initial idea was to obtain a single suite without splitting the architecture, subsequently for reasons of source management and to maintain a high quality in the development it was decided to proceed with the split by dividing the frontend from the backend.
 

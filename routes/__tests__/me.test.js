@@ -4,6 +4,8 @@ const { refreshDb } = require("../../jest/refreshDb.js");
 const { user } = require("../../jest/schema.js");
 const { dbInstance } = require("../../lib/dbInstance");
 
+let accessToken = null;
+
 beforeAll(async () => {
   await refreshDb();
   accessToken = await doLogin("info@renatopozzi.me", "password");

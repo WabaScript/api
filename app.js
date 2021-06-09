@@ -29,7 +29,6 @@ const build = (opts = {}) => {
   app.register(collect, { prefix: "/v2" });
   app.register(me, { prefix: "/v2/me" });
   app.register(auth, { prefix: "/v2/auth" });
-  // app.register(debug, { prefix: "/" });
 
   return app;
 };

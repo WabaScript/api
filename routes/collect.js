@@ -21,7 +21,7 @@ const fetchOrCreate = async (instance, payload) => {
     return fetched;
   }
 
-  return await new instance(payload).save();
+  return new instance(payload).save();
 };
 
 const collect = (fastify, opts, done) => {

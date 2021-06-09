@@ -29,7 +29,7 @@ const login = async ({ email, password }) => {
   return false;
 };
 
-const auth = (fastify, _, done) => {
+const auth = (fastify, _opts, done) => {
   fastify.post("/login", async (request, reply) => {
     const { email, password } = request.body;
 
@@ -55,7 +55,7 @@ const auth = (fastify, _, done) => {
     return reply.status(401).send({ message: "Unauthorized" });
   });
 
-  fastify.post("/logout", async (_, reply) => {
+  fastify.post("/logout", async (_request, reply) => {
     reply
       .setCookie(AUTH_COOKIE, null, {
         // domain: "your.domain",

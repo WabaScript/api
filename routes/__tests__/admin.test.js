@@ -2,9 +2,9 @@ const { build } = require("../../app.js");
 const { user, website, browser } = require("../../jest/schema.js");
 const { dbInstance } = require("../../lib/dbInstance");
 
-beforeAll(async () => await refreshDb());
+beforeAll(async () => refreshDb());
 
-afterAll(async () => await dbInstance.knex.destroy());
+afterAll(async () => dbInstance.knex.destroy());
 
 describe("api v2", () => {
   it.skip("show the websites list", async () => {

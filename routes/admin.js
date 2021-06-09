@@ -4,15 +4,15 @@ const { Browser } = require("../lib/models/Browser");
 
 const admin = (fastify, _, done) => {
   fastify.get("/websites", async () => {
-    return await new Website().fetchAll({ withRelated: ["user"] });
+    return new Website().fetchAll({ withRelated: ["user"] });
   });
 
   fastify.get("/users", async () => {
-    return await new User().fetchAll();
+    return new User().fetchAll();
   });
 
   fastify.get("/browsers", async () => {
-    return await new Browser().fetchAll();
+    return new Browser().fetchAll();
   });
 
   done();

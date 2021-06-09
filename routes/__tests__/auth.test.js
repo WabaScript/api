@@ -2,9 +2,9 @@ const { build } = require("../../app.js");
 const { dbInstance } = require("../../lib/dbInstance");
 const { refreshDb } = require("../../jest/refreshDb");
 
-beforeAll(async () => await refreshDb());
+beforeAll(async () => refreshDb());
 
-afterAll(async () => await dbInstance.knex.destroy());
+afterAll(async () => dbInstance.knex.destroy());
 
 describe("login", () => {
   it("does not login", async () => {

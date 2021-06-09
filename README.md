@@ -7,6 +7,8 @@
 <br/>
 
 <p align="center" style="padding-bottom:3rem">
+<img alt="Sonar Coverage" src="https://img.shields.io/sonar/coverage/useaurora_api?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge" />
+<img alt="Sonar Quality Gate" src="https://img.shields.io/sonar/quality_gate/useaurora_api?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge" />
 <img alt="Stars" src="https://img.shields.io/github/stars/useaurora/api?style=for-the-badge" />
 <img alt="License" src="https://img.shields.io/github/license/useaurora/api?style=for-the-badge" />
 </p>

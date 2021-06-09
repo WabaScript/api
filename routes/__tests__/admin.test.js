@@ -2,6 +2,8 @@ const { build } = require("../../app.js");
 const { user, website, browser } = require("../../jest/schema.js");
 const { dbInstance } = require("../../lib/dbInstance");
 
+beforeAll(async () => await refreshDb());
+
 afterAll(async () => await dbInstance.knex.destroy());
 
 describe("api v2", () => {

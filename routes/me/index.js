@@ -42,15 +42,13 @@ const postMeWebsites = async (request, _reply) => {
 
   const seed = generate();
 
-  const website = await new Website({
+  return new Website({
     url: url,
     name: name,
     seed: seed,
     shared: Boolean(Number(shared)),
     user_id: request.user.data.id,
   }).save();
-
-  return website;
 };
 
 module.exports = { me };

@@ -8,9 +8,9 @@ const me = (fastify, _, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
 
   fastify.get("/", getMe);
-  fastify.put("/", { putMeOpts }, putMe);
+  fastify.put("/", putMeOpts, putMe);
   fastify.get("/websites", getMeWebsites);
-  fastify.post("/websites", { storeMeWebsitesOpts }, postMeWebsites);
+  fastify.post("/websites", storeMeWebsitesOpts, postMeWebsites);
 
   done();
 };

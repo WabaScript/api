@@ -4,6 +4,9 @@ const { refreshDb } = require("../../jest/refreshDb.js");
 const { user, website } = require("../../jest/schema.js");
 const { dbInstance } = require("../../lib/dbInstance");
 
+const putMeFixture = require("../../jest/fixtures/me/putMe.json");
+const postMeWebsitesFixture = require("../../jest/fixtures/me/postMeWebsites.json");
+
 let accessToken = null;
 
 beforeAll(async () => {
@@ -39,78 +42,8 @@ describe("GET /me", () => {
   });
 });
 
-const users = [
-  {
-    data: {
-      firstname: "Giovanni",
-    },
-    status: 400,
-  },
-  {
-    data: {
-      lastname: "Bona",
-    },
-    status: 400,
-  },
-  {
-    data: {
-      email: "info@renatopozzi.me",
-    },
-    status: 400,
-  },
-  {
-    data: {
-      firstname: "Giovanni",
-      lastname: "Bona",
-    },
-    status: 400,
-  },
-  {
-    data: {
-      lastname: "Bona",
-      email: "info@renatopozzi.me",
-    },
-    status: 400,
-  },
-  {
-    data: {
-      firstname: "Giovanni",
-      lastname: "Bona",
-      email: "info@renatopozzi.me",
-    },
-    status: 200,
-  },
-  {
-    data: {
-      firstname: "Giovanni",
-      lastname: "Bona",
-      email: "info@renatopozzi.me",
-      password: "",
-    },
-    status: 400,
-  },
-  {
-    data: {
-      firstname: "Giovanni",
-      lastname: "Bona",
-      email: "info@renatopozzi.me",
-      password: "small",
-    },
-    status: 400,
-  },
-  {
-    data: {
-      firstname: "Giovanni",
-      lastname: "Bona",
-      email: "info@renatopozzi.me",
-      password: "thisdodo",
-    },
-    status: 200,
-  },
-];
-
-describe.each(users)("PUT /me", (row) => {
-  it(`should return ${row.status}`, async () => {
+describe.each(putMeFixture)("PUT /me", (row) => {
+  it(`should return 401`, async () => {
     const app = await build();
     const response = await app.inject({
       method: "PUT",
@@ -121,7 +54,7 @@ describe.each(users)("PUT /me", (row) => {
     expect(response.statusCode).toBe(401);
   });
 
-  it("should return 200", async () => {
+  it(`should return ${row.status}`, async () => {
     const app = await build();
     const response = await app.inject({
       method: "PUT",
@@ -132,61 +65,9 @@ describe.each(users)("PUT /me", (row) => {
       payload: row.data,
     });
 
-    expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject({
-      message: "User info updated.",
-    });
+    expect(response.statusCode).toBe(row.status);
   });
 });
-
-const websites = [
-  {
-    data: {
-      url: "http://golden.com",
-      name: "Golden Website",
-      shared: null,
-    },
-    status: 400,
-  },
-  {
-    data: {
-      name: "Golden Website",
-      shared: null,
-    },
-    status: 400,
-  },
-  {
-    data: {
-      url: "http://golden.com",
-      shared: null,
-    },
-    status: 400,
-  },
-  {
-    data: {
-      url: 1094820,
-      name: "Golden Website",
-      shared: false,
-    },
-    status: 400,
-  },
-  {
-    data: {
-      url: "http://mynameisanumber.com",
-      name: 48204830,
-      shared: false,
-    },
-    status: 400,
-  },
-  {
-    data: {
-      url: "http://thisisgonnawork.com",
-      name: "Im a boss",
-      shared: true,
-    },
-    status: 200,
-  },
-];
 
 describe("GET /me/websites", () => {
   it("should return 401", async () => {
@@ -214,7 +95,7 @@ describe("GET /me/websites", () => {
   });
 });
 
-describe.skip.each(websites)("POST /me/websites", (row) => {
+describe.each(postMeWebsitesFixture)("POST /me/websites", (row) => {
   it(`should return 401`, async () => {
     const app = await build();
     const response = await app.inject({
@@ -238,6 +119,5 @@ describe.skip.each(websites)("POST /me/websites", (row) => {
     });
 
     expect(response.statusCode).toBe(row.status);
-    expect(JSON.parse(response.body)).toMatchObject(website);
   });
 });

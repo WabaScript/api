@@ -3,6 +3,7 @@ require("dotenv").config();
 const fastify = require("fastify");
 const jwt = require("fastify-jwt");
 const cookie = require("fastify-cookie");
+const R = require("ramda");
 
 const { debug } = require("./routes/debug");
 const { admin } = require("./routes/admin");
@@ -20,6 +21,13 @@ const build = (opts = {}) => {
       cookieName: AUTH_COOKIE,
       // signed: true,
     },
+  });
+
+  // is this correct?
+  app.addHook("preValidation", async (request, _reply) => {
+    if (request.body !== null) {
+      request.body = R.reject(R.equals(null))(request.body);
+    }
   });
 
   app.register(cookie);

@@ -6,13 +6,13 @@ const localeCodes = require("locale-codes");
 const UAParser = require("ua-parser-js");
 const mapValuesDeep = require("deepdash/mapValuesDeep");
 
-const { Os } = require("../lib/models/Os");
-const { Event } = require("../lib/models/Event");
-const { Engine } = require("../lib/models/Engine");
-const { Device } = require("../lib/models/Device");
-const { Locale } = require("../lib/models/Locale");
-const { Browser } = require("../lib/models/Browser");
-const { Website } = require("../lib/models/Website");
+const { Os } = require("../../lib/models/Os");
+const { Event } = require("../../lib/models/Event");
+const { Engine } = require("../../lib/models/Engine");
+const { Device } = require("../../lib/models/Device");
+const { Locale } = require("../../lib/models/Locale");
+const { Browser } = require("../../lib/models/Browser");
+const { Website } = require("../../lib/models/Website");
 
 const fetchOrCreate = async (instance, payload) => {
   const fetched = await instance.where(payload).fetch({ require: false });

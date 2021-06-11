@@ -27,4 +27,18 @@ const storeMeWebsitesOpts = {
   },
 };
 
-module.exports = { putMeOpts, storeMeWebsitesOpts };
+const putMeWebsiteOpts = {
+  schema: {
+    body: {
+      type: "object",
+      required: ["url", "name", "shared"],
+      properties: {
+        url: { type: "string" },
+        name: { type: "string" },
+        shared: { type: "boolean" },
+      },
+    },
+  },
+};
+
+module.exports = { putMeOpts, storeMeWebsitesOpts, putMeWebsiteOpts };

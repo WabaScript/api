@@ -34,7 +34,7 @@ describe.each(websites)("POST /me/websites", (row) => {
   });
 });
 
-describe("GET /me/websites", () => {
+describe.skip("GET /me/websites", () => {
   it("should return 401", async () => {
     const response = await apiCall("GET", "/v2/me/websites");
     expect(response.statusCode).toBe(401);

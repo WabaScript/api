@@ -1,27 +1,82 @@
 [
   {
-    "data": { "url": "yahoo.co.jp", "name": null, "shared": false },
+    "data": {
+      "url": "yahoo.co.jp",
+      "name": null,
+      "shared": false
+    },
     "status": 400
   },
-  { "data": { "url": null, "name": null, "shared": true }, "status": 400 },
   {
-    "data": { "url": "wsj.com", "name": "Lajo", "shared": null },
+    "data": {
+      "url": null,
+      "name": null,
+      "shared": true
+    },
     "status": 400
   },
-  { "data": { "url": null, "name": null, "shared": null }, "status": 400 },
   {
-    "data": { "url": "ed.gov", "name": "Jetpulse", "shared": false },
+    "data": {
+      "url": "wsj.com",
+      "name": "Lajo",
+      "shared": null
+    },
+    "status": 400
+  },
+  {
+    "data": {
+      "url": null,
+      "name": null,
+      "shared": null
+    },
+    "status": 400
+  },
+  {
+    "data": {
+      "url": "ed.gov",
+      "name": "Jetpulse",
+      "shared": false
+    },
     "status": 200
   },
   {
-    "data": { "url": null, "name": "Brainlounge", "shared": false },
+    "data": {
+      "url": null,
+      "name": "Brainlounge",
+      "shared": false
+    },
     "status": 400
   },
   {
-    "data": { "url": "youku.com", "name": "Tekfly", "shared": false },
+    "data": {
+      "url": "youku.com",
+      "name": "Tekfly",
+      "shared": false
+    },
     "status": 200
   },
-  { "data": { "url": null, "name": null, "shared": null }, "status": 400 },
-  { "data": { "url": null, "name": "Voonder", "shared": null }, "status": 400 },
-  { "data": { "url": null, "name": null, "shared": null }, "status": 400 }
+  {
+    "data": {
+      "url": null,
+      "name": null,
+      "shared": null
+    },
+    "status": 400
+  },
+  {
+    "data": {
+      "url": null,
+      "name": "Voonder",
+      "shared": null
+    },
+    "status": 400
+  },
+  {
+    "data": {
+      "url": null,
+      "name": null,
+      "shared": null
+    },
+    "status": 400
+  }
 ]

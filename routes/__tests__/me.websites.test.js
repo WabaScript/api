@@ -7,6 +7,8 @@ const websites = require("../../jest/fixtures/models/websites.json");
 
 let accessToken = null;
 
+// TODO: Testing.refresh().withLogin().init();
+
 beforeAll(async () => {
   await refreshDb();
   accessToken = await doLogin("info@renatopozzi.me", "password");

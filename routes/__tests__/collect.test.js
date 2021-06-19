@@ -20,6 +20,23 @@ describe("POST /collect", () => {
     expect(response.statusCode).toBe(400);
   });
 
+  it(`should return 400`, async () => {
+    const response = await apiCall("POST", "/v2/collect", {
+      payload: {
+        element: "/",
+        language: "en-GB",
+        referrer: "",
+        seed: "this_seed_is_not_present",
+        type: "pageView",
+      },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.body)).toMatchObject({
+      message: "Aurora ID not defined..",
+    });
+  });
+
   it(`should return 200`, async () => {
     const response = await apiCall("POST", "/v2/collect", {
       payload: {
@@ -35,20 +52,23 @@ describe("POST /collect", () => {
   });
 });
 
-// describe.each(putMeFixture)("PUT /me", (row) => {
-//   it(`should return 401`, async () => {
-//     const response = await apiCall("PUT", "/v2/me", { payload: row.data });
-//     expect(response.statusCode).toBe(401);
-//   });
+describe("POST /collect/:id", () => {
+  it("should return 400", async () => {
+    const response = await apiCall("POST", "/v2/collect/thisisnotpresent");
+    expect(response.statusCode).toBe(400);
+  });
 
-//   it(`should return ${row.status}`, async () => {
-//     const response = await apiCall("PUT", "/v2/me", {
-//       headers: {
-//         Authorization: `Bearer ${accessToken}`,
-//       },
-//       payload: row.data,
-//     });
+  it.skip(`should return 400`, async () => {
+    const response = await apiCall("POST", "/v2/collect/id", {
+      payload: {
+        seed: "this_seed_is_not_present",
+        duration: 1000,
+      },
+    });
 
-//     expect(response.statusCode).toBe(row.status);
-//   });
-// });
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.body)).toMatchObject({
+      message: "Aurora ID not defined..",
+    });
+  });
+});

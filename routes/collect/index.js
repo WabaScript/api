@@ -9,22 +9,22 @@ const { Website } = require("../../lib/models/Website");
 const { fetchOrCreate } = require("../../utils/query");
 const { parse } = require("../../utils/ua");
 const { tag } = require("../../utils/locale");
-const { collectOpts } = require("./opts");
+const { collectOpts, collectIdOpts } = require("./opts");
 
 const collect = (fastify, _opts, done) => {
   fastify.post("/collect", collectOpts, collectEvent);
-  fastify.post("/collect/:id", updateEvent);
+  fastify.post("/collect/:id", collectIdOpts, updateEvent);
 
   done();
 };
 
-const collectEvent = async (request, _reply) => {
+const collectEvent = async (request, reply) => {
   const { type, element, language, seed, referrer } = request.body;
 
   const website = await Website.where("seed", seed).fetch({ require: false });
 
   if (!website) {
-    return { message: "Aurora ID not defined.." };
+    return reply.code(400).send({ message: "Aurora ID not defined.." });
   }
 
   const eventHash = "dddd"; // TODO: Get
@@ -93,7 +93,7 @@ const updateEvent = async (request, reply) => {
   const website = await Website.where("seed", seed).fetch();
 
   if (!website) {
-    return reply.status(422);
+    return reply.code(400).send({ message: "Aurora ID not defined.." });
   }
 
   try {

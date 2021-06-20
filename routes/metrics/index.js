@@ -32,6 +32,7 @@ const metrics = (fastify, _, done) => {
   fastify.get("/:seed/views/page", metricsOpts, getViewsByPage);
   fastify.get("/:seed/views/referrer", metricsOpts, getViewsByReferrer);
   fastify.get("/:seed/views/series", metricsOpts, getViewsBySeries);
+  fastify.get("/:seed/performance", metricsOpts, getPerformance);
 
   done();
 };
@@ -209,6 +210,64 @@ const getViewsBySeries = async (request, _reply) => {
         data: values,
       },
     ],
+  };
+
+  return response;
+};
+
+const getPerformance = async (request, _reply) => {
+  const { range } = request.query;
+  const { seed } = request.params;
+
+  const data = await dbInstance.knex.raw(`
+    SELECT
+      COUNT(events.created_at) as cp_views,
+      COUNT(DISTINCT events.hash) as cp_unique,
+      AVG(events.duration) as cp_visit_duration,
+      (
+        select
+          COALESCE(sum(t.c), 0)
+        from
+          (
+            select
+              count(events.id) as c
+            from
+              events
+            JOIN websites ON events.website_id = websites.id
+            WHERE
+              events.created_at >= DATE_TRUNC('${range}', now())
+              AND websites.seed = '${seed}'
+              AND events.type = 'pageView'
+            group by
+              hash
+            having
+              count(events.id) = 1
+          ) as t
+      ) as cp_bounces
+    FROM
+      events
+      JOIN websites ON events.website_id = websites.id
+    WHERE
+      events.created_at >= DATE_TRUNC('${range}', now())
+      AND websites.seed = '${seed}'
+      AND events.type = 'pageView'
+  `);
+
+  const perf = data.rows.reduce((acc, el) => el, {});
+
+  const response = {
+    pageViews: {
+      cp: perf.cp_views,
+    },
+    uniqueVisitors: {
+      cp: perf.cp_unique,
+    },
+    bounceRate: {
+      cp: perf.cp_bounces,
+    },
+    visitDuration: {
+      cp: Math.round(perf.cp_visit_duration / 1000),
+    },
   };
 
   return response;

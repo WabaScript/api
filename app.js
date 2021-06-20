@@ -20,6 +20,7 @@ const build = (opts = {}) => {
 
   app.register(cors, {
     origin: true,
+    credentials: true,
   });
 
   app.register(jwt, {

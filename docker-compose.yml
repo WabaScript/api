@@ -1,0 +1,30 @@
+version: "3.7"
+services:
+  api:
+    image: ghcr.io/useaurora/api/api:dev
+    ports:
+      - "5000:5000"
+    environment:
+      DB_CONNECTION: pg
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: aurora
+      DB_USERNAME: aurora
+      DB_PASSWORD: aurora
+      DB_SSL: "false"
+
+      JWT_SECRET: VBQX05BTUU9SG9yaXpvbgpBUFBfRU5WPWxvY2FsCkFQUF9LRVk9YmFzZTY0OlhYV0dFOU9uV3p
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_DB: aurora
+      POSTGRES_USER: aurora
+      POSTGRES_PASSWORD: aurora
+    volumes:
+      - aurora_postgres:/var/lib/postgresql/data
+
+volumes:
+  aurora_postgres:

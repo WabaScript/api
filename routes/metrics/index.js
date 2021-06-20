@@ -146,7 +146,7 @@ const getViewsBySeries = async (request, _reply) => {
   const { range } = request.query;
   const { seed } = request.params;
 
-  let factor = "hour";
+  let factor;
 
   switch (range) {
     case "day":
@@ -203,7 +203,7 @@ const getViewsBySeries = async (request, _reply) => {
   const labels = data.rows.map((el) => el.range);
   const values = data.rows.map((el) => el.views);
 
-  const response = {
+  return {
     labels: labels,
     series: [
       {
@@ -212,8 +212,6 @@ const getViewsBySeries = async (request, _reply) => {
       },
     ],
   };
-
-  return response;
 };
 
 const getPerformance = async (request, _reply) => {
@@ -256,7 +254,7 @@ const getPerformance = async (request, _reply) => {
 
   const perf = data.rows.reduce((acc, el) => el, {});
 
-  const response = {
+  return {
     pageViews: {
       cp: perf.cp_views,
     },
@@ -270,8 +268,6 @@ const getPerformance = async (request, _reply) => {
       cp: Math.round(perf.cp_visit_duration / 1000),
     },
   };
-
-  return response;
 };
 
 const getRealtimeVisitors = async (request, _reply) => {
@@ -285,9 +281,7 @@ const getRealtimeVisitors = async (request, _reply) => {
     .where("events.type", "pageView")
     .where("websites.seed", seed);
 
-  const lastNSecondsVisitors = await rows.reduce((acc, el) => el, {});
-
-  return lastNSecondsVisitors;
+  return await rows.reduce((acc, el) => el, {});
 };
 
 const format = (rows) => {

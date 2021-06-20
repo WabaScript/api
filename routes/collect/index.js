@@ -19,7 +19,7 @@ const collect = (fastify, _opts, done) => {
 };
 
 const collectEvent = async (request, reply) => {
-  const { type, element, language, seed, referrer } = request.body;
+  const { type, element, language, seed, referrer, fingerprint } = request.body;
 
   const website = await Website.where("seed", seed).fetch({ require: false });
 
@@ -27,7 +27,6 @@ const collectEvent = async (request, reply) => {
     return reply.code(400).send({ message: "Aurora ID not defined.." });
   }
 
-  const eventHash = "dddd"; // TODO: Get
   const ua = parse(request.headers["user-agent"]);
   const locale = tag(language);
 
@@ -70,7 +69,7 @@ const collectEvent = async (request, reply) => {
     type: type,
     element: element,
     referrer: referrer || null,
-    hash: eventHash,
+    hash: fingerprint,
     website_id: website.id,
     browser_id: browser.id,
     engine_id: engine.id,

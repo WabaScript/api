@@ -33,7 +33,7 @@ beforeAll(async () => {
 
 afterAll(async () => dbInstance.knex.destroy());
 
-describe.each(["browser", "country", "os", "page", "referrer"])(
+describe.each(["browser", "country", "os", "page", "referrer", "series"])(
   "Different Targets",
   (target) => {
     it("should return 404", async () => {

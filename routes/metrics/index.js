@@ -31,6 +31,7 @@ const metrics = (fastify, _, done) => {
   fastify.get("/:seed/views/os", metricsOpts, getViewsByOs);
   fastify.get("/:seed/views/page", metricsOpts, getViewsByPage);
   fastify.get("/:seed/views/referrer", metricsOpts, getViewsByReferrer);
+  fastify.get("/:seed/views/series", metricsOpts, getViewsBySeries);
 
   done();
 };
@@ -137,6 +138,80 @@ const getViewsByReferrer = async (request, _reply) => {
     .limit(8);
 
   return format(rows);
+};
+
+const getViewsBySeries = async (request, _reply) => {
+  const { range } = request.query;
+  const { seed } = request.params;
+
+  let factor = "hour";
+
+  switch (range) {
+    case "day":
+      factor = "hour";
+      break;
+    case "year":
+      factor = "month";
+      break;
+    case "month":
+      factor = "day";
+      break;
+    case "week":
+      factor = "day";
+      break;
+    default:
+      throw new Error("Not a valid option..");
+  }
+
+  const data = await dbInstance.knex.raw(`
+    SELECT
+      range.generate_series as range,
+      SUM(
+        COALESCE(e.views, 0)
+      ) AS views
+    FROM
+      (
+        SELECT
+          generate_series(
+            date_trunc('${range}', now()),
+            date_trunc('${range}', now()) + '1 ${range}' :: interval - '1 ${factor}' :: interval,
+            '1 ${factor}' :: interval
+          ):: timestamptz
+      ) as range
+      LEFT JOIN (
+        SELECT
+          events.created_at AS day,
+          COUNT(events.id) AS views
+        FROM
+          events
+          JOIN websites on websites.id = events.website_id
+        WHERE
+          websites.seed = '${seed}'
+        AND
+          events.type = 'pageView'
+        GROUP BY
+          day
+      ) AS e ON range.generate_series = date_trunc('${factor}', e.day)
+    GROUP BY
+      range
+    ORDER BY
+      range
+  `);
+
+  const labels = data.rows.map((el) => el.range);
+  const values = data.rows.map((el) => el.views);
+
+  const response = {
+    labels: labels,
+    series: [
+      {
+        name: "visits",
+        data: values,
+      },
+    ],
+  };
+
+  return response;
 };
 
 const format = (rows) => {

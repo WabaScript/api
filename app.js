@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const fastify = require("fastify");
 const jwt = require("fastify-jwt");
+const cors = require("fastify-cors");
 const cookie = require("fastify-cookie");
 const R = require("ramda");
 
@@ -16,6 +17,10 @@ const { metrics } = require("./routes/metrics");
 
 const build = (opts = {}) => {
   const app = fastify(opts);
+
+  app.register(cors, {
+    origin: true,
+  });
 
   app.register(jwt, {
     secret: process.env.JWT_SECRET,

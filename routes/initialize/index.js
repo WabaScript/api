@@ -1,5 +1,5 @@
 const { dbInstance } = require("../../lib/dbInstance");
-const { User } = require("../../lib/models/User");
+const { User } = require("../../lib/models");
 const { hash } = require("../../utils/hash");
 const { initializeUserOpts } = require("./opts");
 

@@ -1,4 +1,4 @@
-const { Website } = require("../../lib/models/Website");
+const { Website } = require("../../lib/models");
 const { storeMeWebsitesOpts, putMeWebsiteOpts } = require("./opts");
 const { generate } = require("../../utils/seeds");
 

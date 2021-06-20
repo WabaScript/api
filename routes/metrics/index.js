@@ -33,6 +33,7 @@ const metrics = (fastify, _, done) => {
   fastify.get("/:seed/views/referrer", metricsOpts, getViewsByReferrer);
   fastify.get("/:seed/views/series", metricsOpts, getViewsBySeries);
   fastify.get("/:seed/performance", metricsOpts, getPerformance);
+  fastify.get("/:seed/realtime/visitors", getRealtimeVisitors);
 
   done();
 };
@@ -271,6 +272,22 @@ const getPerformance = async (request, _reply) => {
   };
 
   return response;
+};
+
+const getRealtimeVisitors = async (request, _reply) => {
+  const { seed } = request.params;
+
+  const rows = await dbInstance
+    .knex("events")
+    .countDistinct("events.hash as visitors")
+    .join("websites", "events.website_id", "websites.id")
+    .whereRaw(`events.created_at >= (now() - '30 second' :: interval)`)
+    .where("events.type", "pageView")
+    .where("websites.seed", seed);
+
+  const lastNSecondsVisitors = await rows.reduce((acc, el) => el, {});
+
+  return lastNSecondsVisitors;
 };
 
 const format = (rows) => {

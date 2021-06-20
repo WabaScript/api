@@ -1,4 +1,4 @@
-const { User } = require("../../lib/models/User");
+const { User } = require("../../lib/models");
 const { putMeOpts } = require("./opts");
 const { hash } = require("../../utils/hash");
 

@@ -1,6 +1,6 @@
-const { Website } = require("../../lib/models/Website");
-const { User } = require("../../lib/models/User");
-const { Browser } = require("../../lib/models/Browser");
+const { Website } = require("../../lib/models");
+const { User } = require("../../lib/models");
+const { Browser } = require("../../lib/models");
 
 const admin = (fastify, _, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());

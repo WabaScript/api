@@ -1,10 +1,10 @@
-const { Os } = require("../../lib/models/Os");
-const { Event } = require("../../lib/models/Event");
-const { Engine } = require("../../lib/models/Engine");
-const { Device } = require("../../lib/models/Device");
-const { Locale } = require("../../lib/models/Locale");
-const { Browser } = require("../../lib/models/Browser");
-const { Website } = require("../../lib/models/Website");
+const { Os } = require("../../lib/models");
+const { Event } = require("../../lib/models");
+const { Engine } = require("../../lib/models");
+const { Device } = require("../../lib/models");
+const { Locale } = require("../../lib/models");
+const { Browser } = require("../../lib/models");
+const { Website } = require("../../lib/models");
 
 const { fetchOrCreate } = require("../../utils/query");
 const { parse } = require("../../utils/ua");

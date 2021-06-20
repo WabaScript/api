@@ -1,4 +1,4 @@
-const { User } = require("../../lib/models/User");
+const { User } = require("../../lib/models");
 const { verify } = require("../../utils/hash");
 const { AUTH_COOKIE, AUTH_COOKIE_LIFETIME } = require("../../utils/constants");
 

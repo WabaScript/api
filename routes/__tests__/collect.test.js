@@ -28,6 +28,7 @@ describe("POST /collect", () => {
         referrer: "",
         seed: "this_seed_is_not_present",
         type: "pageView",
+        fingerprint: "thisismyfp",
       },
     });
 
@@ -45,6 +46,7 @@ describe("POST /collect", () => {
         referrer: "",
         seed: "40551333ba09839f5287a7a6aa2f73fe",
         type: "pageView",
+        fingerprint: "thisismyfp",
       },
     });
 

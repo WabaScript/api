@@ -7,7 +7,11 @@
     "db:seed": "knex seed:run",
     "migrate": "knex migrate:latest",
     "migrate:refresh": "knex migrate:rollback --all && knex migrate:latest",
+    "start": "node server.js",
     "test": "jest --coverage --runInBand --verbose"
+  },
+  "engines": {
+    "node": "14.x"
   },
   "keywords": [],
   "author": "",

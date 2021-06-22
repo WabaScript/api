@@ -1,4 +1,5 @@
 const { dbInstance } = require("../../lib/dbInstance");
+const { Website } = require("../../lib/models");
 const { percentage } = require("../../utils/math");
 const { metricsOpts } = require("./opts");
 
@@ -34,6 +35,7 @@ const metrics = (fastify, _, done) => {
   fastify.get("/:seed/views/series", metricsOpts, getViewsBySeries);
   fastify.get("/:seed/performance", metricsOpts, getPerformance);
   fastify.get("/:seed/realtime/visitors", getRealtimeVisitors);
+  fastify.get("/:seed", getInformations);
 
   done();
 };
@@ -282,6 +284,16 @@ const getRealtimeVisitors = async (request, _reply) => {
     .where("websites.seed", seed);
 
   return await rows.reduce((acc, el) => el, {});
+};
+
+const getInformations = async (request, _reply) => {
+  const { seed } = request.params;
+
+  const website = await new Website({
+    seed: seed,
+  }).fetch();
+
+  return { name: website.get("name"), url: website.get("url") };
 };
 
 const format = (rows) => {

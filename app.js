@@ -3,7 +3,7 @@ require("dotenv").config();
 const fastify = require("fastify");
 const jwt = require("fastify-jwt");
 const cors = require("fastify-cors");
-const static = require("fastify-static");
+const fstatic = require("fastify-static");
 const cookie = require("fastify-cookie");
 const path = require("path");
 const R = require("ramda");
@@ -34,7 +34,7 @@ const build = (opts = {}) => {
     },
   });
 
-  app.register(static, {
+  app.register(fstatic, {
     root: path.join(__dirname, "public"),
     prefix: "/public/",
   });

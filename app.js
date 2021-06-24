@@ -3,7 +3,9 @@ require("dotenv").config();
 const fastify = require("fastify");
 const jwt = require("fastify-jwt");
 const cors = require("fastify-cors");
+const static = require("fastify-static");
 const cookie = require("fastify-cookie");
+const path = require("path");
 const R = require("ramda");
 
 const { debug } = require("./routes/debug");
@@ -30,6 +32,11 @@ const build = (opts = {}) => {
       cookieName: AUTH_COOKIE,
       // signed: true,
     },
+  });
+
+  app.register(static, {
+    root: path.join(__dirname, "public"),
+    prefix: "/public/",
   });
 
   // is this correct?

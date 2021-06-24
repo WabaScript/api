@@ -36,6 +36,7 @@ const build = (opts = {}) => {
   app.addHook("preValidation", async (request, _reply) => {
     if (request.body !== null) {
       request.body = R.reject(R.equals(null))(request.body);
+      request.body = R.reject(R.equals(""))(request.body);
     }
   });
 

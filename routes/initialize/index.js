@@ -1,5 +1,5 @@
 const { dbInstance } = require("../../lib/dbInstance");
-const { User } = require("../../lib/models");
+const { User, Setting } = require("../../lib/models");
 const { hash } = require("../../utils/hash");
 const { initializeUserOpts } = require("./opts");
 
@@ -22,14 +22,20 @@ const initializeDatabase = async (_request, reply) => {
 const initializeUser = async (request, reply) => {
   const { email, password } = request.body;
 
-  const user = new User({
+  const user = await new User({
     firstname: "Change",
     lastname: "Me",
     email: email,
     password: hash(password),
   }).save();
 
-  reply.send({ message: "User created correctly!", data: user });
+  // Initalize flag
+  const setting = await new Setting({
+    key: "APP_INITIALIZED",
+    value: "YES",
+  }).save();
+
+  reply.send({ message: "User created correctly!", data: { user, setting } });
 };
 
 module.exports = { initialize };

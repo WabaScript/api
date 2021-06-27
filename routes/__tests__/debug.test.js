@@ -22,3 +22,25 @@ it("healthcheck is going fine", async () => {
   expect(response.statusCode).toBe(200);
   expect(JSON.parse(response.body)).toMatchObject({ status: "ok" });
 });
+
+it("status is going fine", async () => {
+  const app = await build();
+  const response = await app.inject({
+    method: "GET",
+    url: "/status",
+  });
+
+  expect(response.statusCode).toBe(200);
+  expect(JSON.parse(response.body)).toMatchObject({ status: "uninitialized" });
+});
+
+it("status is uninitialized", async () => {
+  const app = await build();
+  const response = await app.inject({
+    method: "GET",
+    url: "/status",
+  });
+
+  expect(response.statusCode).toBe(200);
+  expect(JSON.parse(response.body)).toMatchObject({ status: "uninitialized" });
+});

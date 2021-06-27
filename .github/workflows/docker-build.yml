@@ -1,8 +1,8 @@
 name: Docker Image CI
 
 on:
-  push:
-    branch: [main]
+  release:
+    types: [released]
 
 jobs:
   build:
@@ -37,6 +37,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}/${{ env.PROJECT_NAME }}:latest
+            ghcr.io/${{ github.repository }}/${{ env.PROJECT_NAME }}:${{ env.PROJECT_VERSION }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

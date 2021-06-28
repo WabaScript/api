@@ -15,11 +15,9 @@
 
 <br/>
 
-# NB: This is under development. For the current version, please have a look to [this](https://github.com/useaurora/aurora)
+# Aurora APIs Module
 
 The initial idea was to obtain a single suite without splitting the architecture, subsequently for reasons of source management and to maintain a high quality in the development it was decided to proceed with the split by dividing the frontend from the backend.
-
-At the moment the APIs are in continuous development, as soon as they are stable the documentation will be made available.
 
 ### Built With 🏗️
 
@@ -28,7 +26,7 @@ At the moment the APIs are in continuous development, as soon as they are stable
 
 ### Versioning 🚦
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/itsrennyman/aurora/tags).
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/useaurora/api/tags).
 
 ### Authors 🙋
 
@@ -36,7 +34,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ### Stargazers 🌟
 
-[![Stargazers repo roster for @itsrennyman/aurora](https://reporoster.com/stars/itsrennyman/aurora)](https://github.com/useaurora/api/stargazers)
+[![Stargazers repo roster for @itsrennyman/aurora](https://reporoster.com/stars/useaurora/api)](https://github.com/useaurora/api/stargazers)
 
 See also the list of [contributors](https://github.com/useaurora/api/contributors) who participated in this project.
 

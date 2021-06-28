@@ -9,11 +9,11 @@ const { Website } = require("../../lib/models");
 const { fetchOrCreate } = require("../../utils/query");
 const { parse } = require("../../utils/ua");
 const { tag } = require("../../utils/locale");
-const { collectOpts, collectIdOpts } = require("./opts");
+const { collectOpts } = require("./opts");
 
 const collect = (fastify, _opts, done) => {
   fastify.post("/collect", collectOpts, collectEvent);
-  fastify.post("/collect/:id", collectIdOpts, updateEvent);
+  fastify.post("/collect/:id", updateEvent);
 
   done();
 };
@@ -85,8 +85,8 @@ const collectEvent = async (request, reply) => {
 };
 
 const updateEvent = async (request, reply) => {
-  const { id } = request.query;
-  const { duration, seed } = JSON.parse(request.body); // Send Beacon Require Parsing
+  const { id } = request.params;
+  const { duration, seed } = request.body;
 
   // Get Website by seed
   const website = await Website.where("seed", seed).fetch();
@@ -97,10 +97,10 @@ const updateEvent = async (request, reply) => {
 
   try {
     await new Event()
-      .where({ id: id, website_id: website.id })
+      .where({ id: id, website_id: website.get("id") })
       .save({ duration: duration }, { patch: true });
   } catch (err) {
-    console.log("Impossible to log duration.");
+    console.log("Impossible to log duration.", err);
   }
 
   return reply.status(200);

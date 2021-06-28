@@ -13,17 +13,4 @@ const collectOpts = {
   },
 };
 
-const collectIdOpts = {
-  schema: {
-    body: {
-      type: "object",
-      required: ["duration", "seed"],
-      properties: {
-        duration: { type: "number" },
-        seed: { type: "string" },
-      },
-    },
-  },
-};
-
-module.exports = { collectOpts, collectIdOpts };
+module.exports = { collectOpts };

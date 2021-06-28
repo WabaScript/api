@@ -60,13 +60,17 @@ const fpPromise = FingerprintJS.load();
         // Push current duration in timings
         timings.push(performance.now() - start);
 
-        navigator.sendBeacon(
-          `${analyticsUrl}/${lastPageViewID}`,
-          JSON.stringify({
-            seed: websiteSeed,
-            duration: sum(timings),
-          })
+        const blob = new Blob(
+          [
+            JSON.stringify({
+              seed: websiteSeed,
+              duration: sum(timings),
+            }),
+          ],
+          { type: "application/json; charset=UTF-8" }
         );
+
+        navigator.sendBeacon(`${analyticsUrl}/${lastPageViewID}`, blob);
       } else {
         start = performance.now();
       }

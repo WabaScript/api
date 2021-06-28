@@ -55,7 +55,7 @@ describe("POST /collect", () => {
 });
 
 describe("POST /collect/:id", () => {
-  it("should return 400", async () => {
+  it.skip("should return 400", async () => {
     const response = await apiCall("POST", "/v2/collect/thisisnotpresent");
     expect(response.statusCode).toBe(400);
   });

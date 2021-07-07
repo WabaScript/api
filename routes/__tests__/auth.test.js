@@ -37,6 +37,8 @@ describe("login", () => {
 
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toHaveProperty("access_token");
+    expect(JSON.parse(response.body)).toHaveProperty("response_type");
+    expect(JSON.parse(response.body).response_type).toBe("jwt");
   });
 });
 

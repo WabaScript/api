@@ -17,6 +17,8 @@ const postLogin = async (request, reply) => {
   if (user) {
     const accessToken = await reply.jwtSign({ data: user });
 
+    const responseType = process.env.AUTH_MODE || "jwt";
+
     reply
       .setCookie(AUTH_COOKIE, accessToken, {
         // domain: "your.domain",
@@ -27,7 +29,7 @@ const postLogin = async (request, reply) => {
         maxAge: AUTH_COOKIE_LIFETIME,
       })
       .status(200)
-      .send({ access_token: accessToken });
+      .send({ response_type: responseType, access_token: accessToken });
   }
 
   // Set unauthorized.

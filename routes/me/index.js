@@ -1,33 +1,20 @@
-const { User } = require("../../lib/models");
 const { putMeOpts } = require("./opts");
-const { hash } = require("../../utils/hash");
+const { getUserByEmail, updateUser } = require("../../lib/db");
 
 const me = (fastify, _, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
 
-  fastify.get("/", getMe);
-  fastify.put("/", putMeOpts, putMe);
+  fastify.get("/", async (request, _) => {
+    return await getUserByEmail(request.user.data.email);
+  });
+
+  fastify.put("/", putMeOpts, async (request, _) => {
+    const user = request.user.data;
+    await updateUser(user.id, { ...request.body });
+    return { message: "User info updated." };
+  });
 
   done();
-};
-
-const getMe = async (request, _reply) => request.user.data;
-
-const putMe = async (request, _reply) => {
-  const user = request.user.data;
-  const { firstname, lastname, email, password } = request.body;
-
-  await new User({ id: user.id, email: user.email }).save(
-    {
-      firstname: firstname,
-      lastname: lastname,
-      email: email,
-      ...(password !== undefined && { password: hash(password) }),
-    },
-    { patch: true }
-  );
-
-  return { message: "User info updated." };
 };
 
 module.exports = { me };

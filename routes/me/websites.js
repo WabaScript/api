@@ -1,79 +1,60 @@
 const { Website } = require("../../lib/models");
 const { storeMeWebsitesOpts, putMeWebsiteOpts } = require("./opts");
 const { generate } = require("../../utils/seeds");
+const {
+  getUserWebsites,
+  getUserWebsite,
+  updateUserWebsite,
+  deleteUserWebsite,
+  createUserWebsite,
+} = require("../../lib/db");
 
 const websites = (fastify, _, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
 
-  fastify.get("/websites", getMeWebsites);
-  fastify.get("/websites/:seed", getMeWebsite);
-  fastify.put("/websites/:seed", putMeWebsiteOpts, putMeWebsite);
-  fastify.delete("/websites/:seed", deleteMeWebsite);
-  fastify.post("/websites", storeMeWebsitesOpts, postMeWebsites);
+  fastify.get("/websites", async (request, _) => {
+    return await getUserWebsites(request.user.data.id);
+  });
+
+  fastify.get("/websites/:seed", async (request, reply) => {
+    const { seed } = request.params;
+
+    try {
+      const website = await getUserWebsite(request.user.data.id, seed);
+    } catch (err) {
+      return reply.status(404).send({ message: "Not found" });
+    }
+
+    website.shared = +website.shared;
+
+    return website;
+  });
+
+  fastify.put("/websites/:seed", putMeWebsiteOpts, async (request, _) => {
+    const { seed } = request.params;
+    const website = await updateUserWebsite(request.user.data.id, seed, {
+      ...request.body,
+    });
+
+    return { message: "Updated.", data: website };
+  });
+
+  fastify.delete("/websites/:seed", async (request, _) => {
+    const { seed } = request.params;
+    await deleteUserWebsite(request.user.data.id, seed);
+    return { message: "Deleted" };
+  });
+
+  fastify.post("/websites", storeMeWebsitesOpts, async (request, _) => {
+    const seed = generate();
+
+    return await createUserWebsite(request.user.data.id, {
+      seed,
+      ...request.body,
+    });
+  });
 
   done();
-};
-
-const getMeWebsites = async (request, _reply) =>
-  new Website().where("user_id", request.user.data.id).fetchAll();
-
-const getMeWebsite = async (request, reply) => {
-  const { seed } = request.params;
-
-  const website = await new Website({
-    seed: seed,
-    user_id: request.user.data.id,
-  })
-    .fetch()
-    .catch((_error) => reply.status(404).send({ message: "Not found" }));
-
-  // Boolean to int
-  website.shared = +website.shared;
-
-  return website;
-};
-
-const putMeWebsite = async (request, _reply) => {
-  const { seed } = request.params;
-  const { name, url, shared } = request.body;
-
-  const website = await new Website()
-    .where({ seed: seed, user_id: request.user.data.id })
-    .save(
-      {
-        name: name,
-        url: url,
-        shared: Boolean(Number(shared)),
-      },
-      { patch: true }
-    );
-
-  return { message: "Updated.", data: website };
-};
-
-const deleteMeWebsite = async (request, _reply) => {
-  const { seed } = request.params;
-
-  await new Website()
-    .where("seed", seed)
-    .where("user_id", request.user.data.id)
-    .destroy();
-
-  return { message: "Deleted" };
-};
-
-const postMeWebsites = async (request, _reply) => {
-  const { name, url, shared } = request.body;
-
-  const seed = generate();
-
-  return new Website({
-    url: url,
-    name: name,
-    seed: seed,
-    shared: Boolean(Number(shared)),
-    user_id: request.user.data.id,
-  }).save();
 };
 
 module.exports = { websites };

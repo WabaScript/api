@@ -4,7 +4,8 @@ const admin = (fastify, _opts, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
 
   fastify.get("/websites", async () => {
-    return getAllWebsites();
+    const { data } = await getAllWebsites();
+    return data;
   });
 
   fastify.get("/users", async () => {

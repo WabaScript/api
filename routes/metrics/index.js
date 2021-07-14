@@ -141,7 +141,7 @@ const metrics = (fastify, _opts, done) => {
     const { seed } = request.params;
     const rows = await getWebsiteRealtimeVisitors(seed);
 
-    return rows.reduce((_, el) => el, {});
+    return rows.reduce((_acc, el) => el, {});
   });
 
   fastify.get("/:seed", async (request, _) => {

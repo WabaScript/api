@@ -13,7 +13,7 @@ const {
   getWebsiteViewsBySeries,
 } = require("../../lib/db");
 
-const metrics = (fastify, _, done) => {
+const metrics = (fastify, _opts, done) => {
   fastify.addHook("onRequest", async (request, reply) => {
     const { seed } = request.params;
 

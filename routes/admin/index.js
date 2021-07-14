@@ -1,18 +1,18 @@
 const { getAllBrowsers, getAllWebsites, getAllUsers } = require("../../lib/db");
 
-const admin = (fastify, _, done) => {
+const admin = (fastify, _opts, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
 
   fastify.get("/websites", async () => {
-    return await getAllWebsites();
+    return getAllWebsites();
   });
 
   fastify.get("/users", async () => {
-    return await getAllUsers();
+    return getAllUsers();
   });
 
   fastify.get("/browsers", async () => {
-    return await getAllBrowsers();
+    return getAllBrowsers();
   });
 
   done();

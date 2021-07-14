@@ -9,11 +9,11 @@ const {
   createUserWebsite,
 } = require("../../lib/db");
 
-const websites = (fastify, _, done) => {
+const websites = (fastify, _opts, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
 
   fastify.get("/websites", async (request, _) => {
-    return await getUserWebsites(request.user.data.id);
+    return getUserWebsites(request.user.data.id);
   });
 
   fastify.get("/websites/:seed", async (request, reply) => {
@@ -46,7 +46,7 @@ const websites = (fastify, _, done) => {
   fastify.post("/websites", storeMeWebsitesOpts, async (request, _) => {
     const seed = generate();
 
-    return await createUserWebsite(request.user.data.id, {
+    return createUserWebsite(request.user.data.id, {
       seed,
       ...request.body,
     });

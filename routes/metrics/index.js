@@ -17,14 +17,14 @@ const metrics = (fastify, _, done) => {
   fastify.addHook("onRequest", async (request, reply) => {
     const { seed } = request.params;
 
-    const website = await getWebsiteBySeed(seed);
+    try {
+      const website = await getWebsiteBySeed(seed);
 
-    if (!website) {
+      if (website.get("shared") === true) {
+        return true;
+      }
+    } catch (err) {
       return reply.code(404).send({ message: "Not found." });
-    }
-
-    if (website.shared === true) {
-      return true;
     }
 
     try {

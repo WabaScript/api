@@ -21,13 +21,11 @@ const websites = (fastify, _, done) => {
 
     try {
       const website = await getUserWebsite(request.user.data.id, seed);
+      website.shared = +website.shared;
+      return website;
     } catch (err) {
       return reply.status(404).send({ message: "Not found" });
     }
-
-    website.shared = +website.shared;
-
-    return website;
   });
 
   fastify.put("/websites/:seed", putMeWebsiteOpts, async (request, _) => {

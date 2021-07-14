@@ -5,7 +5,8 @@ const me = (fastify, _, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
 
   fastify.get("/", async (request, _) => {
-    return await getUserByEmail(request.user.data.email);
+    return request.user.data;
+    // return await getUserByEmail(request.user.data.email);
   });
 
   fastify.put("/", putMeOpts, async (request, _) => {

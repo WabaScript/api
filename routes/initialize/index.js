@@ -1,6 +1,5 @@
+const { createUser, createSetting } = require("../../lib/db");
 const { dbInstance } = require("../../lib/dbInstance");
-const { User, Setting } = require("../../lib/models");
-const { hash } = require("../../utils/hash");
 const { initializeUserOpts } = require("./opts");
 
 const initialize = (fastify, _opts, done) => {
@@ -22,18 +21,17 @@ const initializeDatabase = async (_request, reply) => {
 const initializeUser = async (request, reply) => {
   const { email, password } = request.body;
 
-  const user = await new User({
+  const user = await createUser({
     firstname: "Change",
     lastname: "Me",
     email: email,
-    password: hash(password),
-  }).save();
+    password: password,
+  });
 
-  // Initalize flag
-  const setting = await new Setting({
+  const setting = await createSetting({
     key: "APP_INITIALIZED",
     value: "YES",
-  }).save();
+  });
 
   reply.send({ message: "User created correctly!", data: { user, setting } });
 };

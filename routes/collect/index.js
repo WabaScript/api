@@ -19,7 +19,7 @@ const collect = (fastify, _opts, done) => {
 };
 
 const collectEvent = async (request, reply) => {
-  const { type, element, language, seed, referrer, fingerprint } = request.body;
+  const { type, element, language, seed, referrer, uid } = request.body;
 
   const website = await Website.where("seed", seed).fetch({ require: false });
 
@@ -69,7 +69,7 @@ const collectEvent = async (request, reply) => {
     type: type,
     element: element,
     referrer: referrer || null,
-    hash: fingerprint,
+    hash: uid,
     website_id: website.id,
     browser_id: browser.id,
     engine_id: engine.id,

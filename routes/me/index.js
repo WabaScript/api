@@ -1,12 +1,11 @@
 const { putMeOpts } = require("./opts");
-const { getUserByEmail, updateUser } = require("../../lib/db");
+const { getUser } = require("../../lib/db");
 
 const me = (fastify, _opts, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
 
-  fastify.get("/", async (request, _) => {
-    return request.user.data;
-    // return await getUserByEmail(request.user.data.email);
+  fastify.get("/", async (request, _response) => {
+    return getUser(request.user.data.id);
   });
 
   fastify.put("/", putMeOpts, async (request, _) => {

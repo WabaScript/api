@@ -1,17 +1,21 @@
 const { putMeOpts } = require("./opts");
-const { getUser } = require("../../lib/db");
+const { getUser, updateUser } = require("../../lib/db");
+const { format } = require("../../utils/response");
 
+// TODO: add tests for new data.
 const me = (fastify, _opts, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
 
-  fastify.get("/", async (request, _response) => {
-    return getUser(request.user.data.id);
+  fastify.get("/", async (request) => {
+    const uid = request.user.data.id;
+    const user = await getUser(uid);
+    return format(user);
   });
 
   fastify.put("/", putMeOpts, async (request, _) => {
-    const user = request.user.data;
-    await updateUser(user.id, { ...request.body });
-    return { message: "User info updated." };
+    const uid = request.user.data.id;
+    const user = await updateUser(uid, Object.values(request.body));
+    return format(user, { message: "User informations updated." });
   });
 
   done();

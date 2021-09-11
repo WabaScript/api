@@ -1,35 +1,23 @@
-const { build } = require("../../app.js");
+const dbInstance = require("../../lib/dbInstance");
+const { apiCall } = require("../../jest/apiCall");
 
-it("home info is going fine", async () => {
-  const app = await build();
-  const response = await app.inject({
-    method: "GET",
-    url: "/",
-  });
+afterAll(async () => dbInstance.end());
 
+it("should go fine", async () => {
+  const response = await apiCall("GET", "/");
   expect(response.statusCode).toBe(200);
   expect(JSON.parse(response.body)).toHaveProperty("message");
   expect(JSON.parse(response.body)).toHaveProperty("version");
 });
 
-it("healthcheck is going fine", async () => {
-  const app = await build();
-  const response = await app.inject({
-    method: "GET",
-    url: "/healthcheck",
-  });
-
+it("should display healthcheck status", async () => {
+  const response = await apiCall("GET", "/healthcheck");
   expect(response.statusCode).toBe(200);
   expect(JSON.parse(response.body)).toMatchObject({ status: "ok" });
 });
 
-it.skip("status is going fine", async () => {
-  const app = await build();
-  const response = await app.inject({
-    method: "GET",
-    url: "/status",
-  });
-
+it("should display status", async () => {
+  const response = await apiCall("GET", "/status");
   expect(response.statusCode).toBe(200);
   expect(JSON.parse(response.body)).toMatchObject({ status: "uninitialized" });
 });

@@ -1,5 +1,5 @@
 const pkg = require("../../package.json");
-const { isInitialized } = require("../../utils/app");
+const { getSetting } = require("../../lib/db");
 
 const debug = (fastify, _opts, done) => {
   fastify.get("/", () => {
@@ -13,18 +13,17 @@ const debug = (fastify, _opts, done) => {
     return { status: "ok" };
   });
 
-  // TODO: refactor this..
-  fastify.get("/status", getStatus);
+  fastify.get("/status", async () => {
+    const appInitialized = await getSetting("APP_INITIALIZED");
+
+    if (appInitialized && appInitialized.value === "YES") {
+      return { status: "initialized" };
+    }
+
+    return { status: "uninitialized" };
+  });
 
   done();
-};
-
-const getStatus = async (_request, _reply) => {
-  if (await isInitialized()) {
-    return { status: "initialized" };
-  }
-
-  return { status: "uninitialized" };
 };
 
 module.exports = { debug };

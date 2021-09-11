@@ -19,7 +19,7 @@ const auth = (fastify, _opts, done) => {
       const accessToken = await reply.jwtSign({ data: user });
       const responseType = process.env.AUTH_MODE || "jwt";
 
-      reply
+      return reply
         .setCookie(AUTH_COOKIE, accessToken, cookieConf)
         .status(200)
         .send({ response_type: responseType, access_token: accessToken });
@@ -44,15 +44,9 @@ const auth = (fastify, _opts, done) => {
 const login = async ({ email, password }) => {
   const user = await getUserByEmail(email);
 
-  if (user && verify(password, user.get("password"))) {
-    return {
-      id: user.get("id"),
-      email: user.get("email"),
-      firstname: user.get("firstname"),
-      lastname: user.get("lastname"),
-      created_at: user.get("created_at"),
-      updated_at: user.get("updated_at"),
-    };
+  if (user && verify(password, user.password)) {
+    const { password, ...rest } = user;
+    return { ...rest };
   }
 
   return false;

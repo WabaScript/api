@@ -1,17 +1,13 @@
-const { build } = require("../../app.js");
-const { dbInstance } = require("../../lib/dbInstance");
-const { refreshDb } = require("../../jest/refreshDb");
+const dbInstance = require("../../lib/dbInstance");
+const { apiCall } = require("../../jest/apiCall");
+const { mockerize } = require("../../lib/mockerize.js");
 
-beforeAll(async () => refreshDb());
-
-afterAll(async () => dbInstance.knex.destroy());
+afterAll(async () => dbInstance.end());
+beforeEach(async () => mockerize("users.json"));
 
 describe("login", () => {
-  it("does not login", async () => {
-    const app = await build();
-    const response = await app.inject({
-      method: "POST",
-      url: "/v2/auth/login",
+  it("should not login", async () => {
+    const response = await apiCall("POST", "/v2/auth/login", {
       payload: {
         email: "thisisbullshit@example.com",
         password: "password",
@@ -24,13 +20,20 @@ describe("login", () => {
     });
   });
 
-  it("does login", async () => {
-    const app = await build();
-    const response = await app.inject({
-      method: "POST",
-      url: "/v2/auth/login",
+  it("should not login", async () => {
+    const response = await apiCall("POST", "/v2/auth/login");
+
+    expect(response.statusCode).toBe(401);
+    expect(JSON.parse(response.body)).toMatchObject({
+      message: "Unauthorized",
+    });
+  });
+
+  it("should login", async () => {
+    // valid user from mocks/users.json
+    const response = await apiCall("POST", "/v2/auth/login", {
       payload: {
-        email: "info@renatopozzi.me",
+        email: "rtroman0@hatena.ne.jp",
         password: "password",
       },
     });
@@ -43,12 +46,8 @@ describe("login", () => {
 });
 
 describe("logout", () => {
-  it("does logout", async () => {
-    const app = await build();
-    const response = await app.inject({
-      method: "POST",
-      url: "/v2/auth/logout",
-    });
+  it("should logout", async () => {
+    const response = await apiCall("POST", "/v2/auth/logout");
 
     expect(response.statusCode).toBe(200);
     expect(response.headers["set-cookie"][0]).not.toBeNull();

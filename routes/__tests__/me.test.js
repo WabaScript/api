@@ -1,20 +1,9 @@
-require("dotenv").config();
 const dbInstance = require("../../lib/dbInstance");
 const { doLogin } = require("../../jest/doLogin.js");
-// const { refreshDb } = require("../../jest/refreshDb.js");
 const { apiCall } = require("../../jest/apiCall");
-
-//const putMeFixture = require("../../jest/fixtures/me/putMe.json");
 const { mockerize } = require("../../lib/mockerize.js");
 const { getUserByEmail } = require("../../lib/db");
 const { verify } = require("../../utils/hash");
-
-//let accessToken = null;
-
-// beforeAll(async () => {
-//   await refreshDb();
-//   accessToken = await doLogin("info@renatopozzi.me", "password");
-// });
 
 afterAll(async () => dbInstance.end());
 

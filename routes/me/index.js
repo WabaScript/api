@@ -1,6 +1,20 @@
-const { putMeOpts } = require("./opts");
 const { getUser, updateUser } = require("../../lib/db");
 const { format } = require("../../utils/response");
+
+const opts = {
+  schema: {
+    body: {
+      type: "object",
+      required: ["firstname", "lastname", "email"],
+      properties: {
+        firstname: { type: "string" },
+        lastname: { type: "string" },
+        email: { type: "string", format: "email" },
+        password: { type: "string", minLength: 8 },
+      },
+    },
+  },
+};
 
 const me = (fastify, _opts, done) => {
   fastify.addHook("onRequest", (request) => request.jwtVerify());
@@ -11,7 +25,7 @@ const me = (fastify, _opts, done) => {
     return format(user);
   });
 
-  fastify.put("/", putMeOpts, async (request, _) => {
+  fastify.put("/", opts, async (request, _) => {
     const uid = request.user.data.id;
     const { password, ...rest } = request.body;
     const user = await updateUser(uid, Object.values({ ...rest }), password);

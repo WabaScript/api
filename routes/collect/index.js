@@ -9,7 +9,21 @@ const { Website } = require("../../lib/models");
 const { fetchOrCreate } = require("../../utils/query");
 const { parse } = require("../../utils/ua");
 const { tag } = require("../../utils/locale");
-const { collectOpts } = require("./opts");
+
+const collectOpts = {
+  schema: {
+    body: {
+      type: "object",
+      required: ["type", "element", "seed"],
+      properties: {
+        type: { type: "string" },
+        element: { type: "string" },
+        seed: { type: "string" },
+        language: { type: "string" },
+      },
+    },
+  },
+};
 
 const collect = (fastify, _opts, done) => {
   fastify.post("/collect", collectOpts, collectEvent);
@@ -21,7 +35,8 @@ const collect = (fastify, _opts, done) => {
 const collectEvent = async (request, reply) => {
   const { type, element, language, seed, referrer, uid } = request.body;
 
-  const website = await Website.where("seed", seed).fetch({ require: false });
+  // TODO: seed will be id?
+  const website = await getWebsite(seed);
 
   if (!website) {
     return reply.code(400).send({ message: "Aurora ID not defined.." });

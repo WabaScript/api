@@ -1,4 +1,5 @@
 const { build } = require("../app");
+const { getUserByEmail } = require("../lib/db");
 
 const doLogin = async (email, password) => {
   const app = await build();
@@ -11,7 +12,16 @@ const doLogin = async (email, password) => {
     },
   });
 
-  return JSON.parse(response.body).access_token;
+  if (response.statusCode === 200) {
+    const user = await getUserByEmail(email);
+
+    return {
+      accessToken: JSON.parse(response.body).access_token,
+      user: user,
+    };
+  }
+
+  return { accessToken: null, user: null };
 };
 
 module.exports = { doLogin };

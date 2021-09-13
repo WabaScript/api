@@ -1,9 +1,10 @@
+const users = require("../../mocks/users.json");
 const dbInstance = require("../../lib/dbInstance");
 const { apiCall } = require("../../jest/apiCall");
-const { mockerize } = require("../../lib/mockerize.js");
+const { mockerize } = require("../../lib/mockerize");
 
+beforeAll(async () => mockerize("users"));
 afterAll(async () => dbInstance.end());
-beforeEach(async () => mockerize("users.json"));
 
 describe("login", () => {
   it("should not login", async () => {
@@ -29,11 +30,10 @@ describe("login", () => {
     });
   });
 
-  it("should login", async () => {
-    // valid user from mocks/users.json
+  it.each(users)("should login $email", async (user) => {
     const response = await apiCall("POST", "/v2/auth/login", {
       payload: {
-        email: "rtroman0@hatena.ne.jp",
+        email: user.email,
         password: "password",
       },
     });

@@ -1,3 +1,4 @@
+const users = require("../../mocks/users.json");
 const dbInstance = require("../../lib/dbInstance");
 const { doLogin } = require("../../jest/doLogin.js");
 const { apiCall } = require("../../jest/apiCall");
@@ -5,9 +6,8 @@ const { mockerize } = require("../../lib/mockerize.js");
 const { getUserByEmail } = require("../../lib/db");
 const { verify } = require("../../utils/hash");
 
+beforeEach(async () => mockerize("users"));
 afterAll(async () => dbInstance.end());
-
-beforeEach(async () => mockerize("users.json"));
 
 describe("GET /me", () => {
   it("should return 401", async () => {
@@ -15,8 +15,8 @@ describe("GET /me", () => {
     expect(response.statusCode).toBe(401);
   });
 
-  it("should return 200", async () => {
-    const accessToken = await doLogin("rtroman0@hatena.ne.jp", "password");
+  it.each(users)("should return 200 $email", async (user) => {
+    const { accessToken } = await doLogin(user.email, "password");
     const response = await apiCall("GET", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -24,16 +24,7 @@ describe("GET /me", () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject({
-      data: {
-        id: expect.any(Number),
-        firstname: expect.any(String),
-        lastname: expect.any(String),
-        email: expect.any(String),
-        created_at: expect.any(String),
-        updated_at: expect.any(String),
-      },
-    });
+    expect(JSON.parse(response.body)).toMatchObject({ data: user });
   });
 });
 
@@ -50,7 +41,7 @@ describe("PUT /me", () => {
       email: "tdevonside0@europa.eu",
     };
 
-    const accessToken = await doLogin("rtroman0@hatena.ne.jp", "password");
+    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -63,9 +54,9 @@ describe("PUT /me", () => {
     const user = await getUserByEmail(payload.email);
 
     expect(typeof user).toBe("object");
-    expect(user.firstname).toBe(payload.firstname);
-    expect(user.lastname).toBe(payload.lastname);
-    expect(user.email).toBe(payload.email);
+    expect(user.firstname).toBe(response.json().data.firstname);
+    expect(user.lastname).toBe(response.json().data.lastname);
+    expect(user.email).toBe(response.json().data.email);
   });
 
   it("should return 200", async () => {
@@ -76,7 +67,7 @@ describe("PUT /me", () => {
       password: "MUEkOBgo3W",
     };
 
-    const accessToken = await doLogin("rtroman0@hatena.ne.jp", "password");
+    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -96,7 +87,7 @@ describe("PUT /me", () => {
   });
 
   it("should return 400", async () => {
-    const accessToken = await doLogin("rtroman0@hatena.ne.jp", "password");
+    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -113,7 +104,7 @@ describe("PUT /me", () => {
   });
 
   it("should return 400", async () => {
-    const accessToken = await doLogin("rtroman0@hatena.ne.jp", "password");
+    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -130,7 +121,7 @@ describe("PUT /me", () => {
   });
 
   it("should return 400", async () => {
-    const accessToken = await doLogin("rtroman0@hatena.ne.jp", "password");
+    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -147,7 +138,7 @@ describe("PUT /me", () => {
   });
 
   it("should return 400", async () => {
-    const accessToken = await doLogin("rtroman0@hatena.ne.jp", "password");
+    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,

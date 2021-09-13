@@ -1,5 +1,4 @@
 const { percentage } = require("../../utils/math");
-const { metricsOpts } = require("./opts");
 
 const {
   getWebsiteViewsByBrowser,
@@ -12,6 +11,21 @@ const {
   getWebsitePerformance,
   getWebsiteViewsBySeries,
 } = require("../../lib/db");
+
+const metricsOpts = {
+  schema: {
+    querystring: {
+      type: "object",
+      properties: {
+        range: {
+          type: "string",
+          enum: ["day", "week", "month", "year"],
+          default: "day",
+        },
+      },
+    },
+  },
+};
 
 const metrics = (fastify, _opts, done) => {
   fastify.addHook("onRequest", async (request, reply) => {

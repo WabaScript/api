@@ -48,49 +48,46 @@ const metrics = (fastify, _opts, done) => {
     }
   });
 
-  fastify.get("/:seed/views/browser", metricsOpts, async (request, _) => {
-    const { range } = request.query;
-    const { seed } = request.params;
+  // TODO: removing seed from params and add it to queryString?
+  fastify.get("/views/browser", metricsOpts, async (request) => {
+    const { seed, range } = request.query;
     const rows = await getWebsiteViewsByBrowser(seed, range);
 
     return format(rows);
   });
 
-  fastify.get("/:seed/views/country", metricsOpts, async (request, _) => {
-    const { range } = request.query;
-    const { seed } = request.params;
+  // http://analytics.renatopozzi.me/v2/metrics/views/browsers?seed=DI3F2JDSKAK&range=7
+
+  fastify.get("/views/country", metricsOpts, async (request, _) => {
+    const { seed, range } = request.query;
     const rows = await getWebsiteViewsByCountry(seed, range);
 
     return format(rows);
   });
 
-  fastify.get("/:seed/views/os", metricsOpts, async (request, _) => {
-    const { range } = request.query;
-    const { seed } = request.params;
+  fastify.get("/views/os", metricsOpts, async (request, _) => {
+    const { seed, range } = request.query;
     const rows = await getWebsiteViewsByOs(seed, range);
 
     return format(rows);
   });
 
-  fastify.get("/:seed/views/page", metricsOpts, async (request, _) => {
-    const { range } = request.query;
-    const { seed } = request.params;
+  fastify.get("/views/page", metricsOpts, async (request, _) => {
+    const { seed, range } = request.query;
     const rows = await getWebsiteViewsByPage(seed, range);
 
     return format(rows);
   });
 
-  fastify.get("/:seed/views/referrer", metricsOpts, async (request, _) => {
-    const { range } = request.query;
-    const { seed } = request.params;
+  fastify.get("/views/referrer", metricsOpts, async (request, _) => {
+    const { seed, range } = request.query;
     const rows = await getWebsiteViewsByReferrer(seed, range);
 
     return format(rows);
   });
 
-  fastify.get("/:seed/views/series", metricsOpts, async (request, _) => {
-    const { range } = request.query;
-    const { seed } = request.params;
+  fastify.get("/views/series", metricsOpts, async (request, _) => {
+    const { seed, range } = request.query;
 
     let factor;
 
@@ -127,9 +124,8 @@ const metrics = (fastify, _opts, done) => {
     };
   });
 
-  fastify.get("/:seed/performance", metricsOpts, async (request, _) => {
-    const { range } = request.query;
-    const { seed } = request.params;
+  fastify.get("/performance", metricsOpts, async (request, _) => {
+    const { seed, range } = request.query;
 
     const data = await getWebsitePerformance(seed, range);
 
@@ -151,15 +147,15 @@ const metrics = (fastify, _opts, done) => {
     };
   });
 
-  fastify.get("/:seed/realtime/visitors", async (request, _) => {
-    const { seed } = request.params;
+  fastify.get("/realtime/visitors", async (request, _) => {
+    const { seed } = request.query;
     const rows = await getWebsiteRealtimeVisitors(seed);
 
     return rows.reduce((_acc, el) => el, {});
   });
 
-  fastify.get("/:seed", async (request, _) => {
-    const { seed } = request.params;
+  fastify.get("/", async (request, _) => {
+    const { seed } = request.query;
     const website = await getWebsiteBySeed(seed);
 
     return { name: website.get("name"), url: website.get("url") };

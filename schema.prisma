@@ -1,0 +1,66 @@
+datasource db {
+    provider = "postgresql"
+    url      = "postgresql://root:password@localhost:5432/aurora?schema=public"
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model User {
+    id         Int      @id @default(autoincrement())
+    firstname  String
+    lastname   String
+    email      String   @unique
+    password   String
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    @@map("users")
+}
+
+model Website {
+    id         String   @id @default(cuid())
+    name       String
+    url        String
+    is_public  Boolean  @default(false)
+    user_id    Int
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    @@map("websites")
+}
+
+model Event {
+    id         String   @id @default(cuid())
+    type       String   @default("pageview")
+    element    String
+    referrer   String?
+    duration   Float    @default(0.0)
+    device     String
+    locale     String
+    website_id String
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    @@map("events")
+}
+
+model EventMetadata {
+    event_id    String
+    metadata_id String
+
+    @@id([event_id, metadata_id])
+    @@map("event_metadata")
+}
+
+model Metadata {
+    id         String   @id @default(cuid())
+    type       String
+    value      String
+    version    String
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    @@map("metadata")
+}

@@ -42,6 +42,10 @@ const auth = (fastify, _opts, done) => {
 };
 
 const login = async ({ email, password }) => {
+  if (!email || !password) {
+    return false;
+  }
+
   const user = await getUserByEmail(email);
 
   if (user && verify(password, user.password)) {

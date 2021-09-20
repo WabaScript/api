@@ -1,10 +1,13 @@
 const users = require("../../mocks/users.json");
-const dbInstance = require("../../lib/dbInstance");
-const { apiCall } = require("../../jest/apiCall");
-const { mockerize } = require("../../lib/mockerize");
+const prisma = require("../../lib/dbInstance");
+const { apiCall } = require("../../utils/tests");
 
-beforeAll(async () => mockerize("users"));
-afterAll(async () => dbInstance.end());
+beforeEach(async () => {
+  await prisma.user.deleteMany();
+  await prisma.website.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.user.createMany({ data: users });
+});
 
 describe("login", () => {
   it("should not login", async () => {

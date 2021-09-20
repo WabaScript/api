@@ -1,13 +1,13 @@
 const users = require("../../mocks/users.json");
-const dbInstance = require("../../lib/dbInstance");
-const { doLogin } = require("../../jest/doLogin.js");
-const { apiCall } = require("../../jest/apiCall");
-const { mockerize } = require("../../lib/mockerize.js");
+const prisma = require("../../lib/dbInstance");
+const { apiCall, doLogin } = require("../../utils/tests");
 const { getUserByEmail } = require("../../lib/db");
 const { verify } = require("../../utils/hash");
 
-beforeEach(async () => mockerize("users"));
-afterAll(async () => dbInstance.end());
+beforeEach(async () => {
+  await prisma.user.deleteMany();
+  await prisma.user.createMany({ data: users });
+});
 
 describe("GET /me", () => {
   it("should return 401", async () => {
@@ -15,7 +15,7 @@ describe("GET /me", () => {
     expect(response.statusCode).toBe(401);
   });
 
-  it.each(users)("should return 200 $email", async (user) => {
+  it.each(users)("should return the user data for $email", async (user) => {
     const { accessToken } = await doLogin(user.email, "password");
     const response = await apiCall("GET", "/v2/me", {
       headers: {
@@ -29,126 +29,108 @@ describe("GET /me", () => {
 });
 
 describe("PUT /me", () => {
+  let accessToken;
+
+  const data = {
+    firstname: "Wren",
+    lastname: "Bilbee",
+    email: "rtroman0@hatena.ne.jp",
+    password: "MUEkOBgo3W",
+  };
+
+  beforeEach(async () => {
+    await prisma.user.deleteMany();
+    await prisma.user.createMany({ data: users });
+
+    ({ accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password"));
+  });
+
   it("should return 401", async () => {
     const response = await apiCall("PUT", "/v2/me", {});
     expect(response.statusCode).toBe(401);
   });
 
-  it("should return 200", async () => {
-    const payload = {
-      firstname: "Teador",
-      lastname: "Devonside",
-      email: "tdevonside0@europa.eu",
-    };
-
-    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
+  it("should update user data and password", async () => {
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-      payload: payload,
+      payload: data,
     });
+
+    const user = await getUserByEmail(data.email);
 
     expect(response.statusCode).toBe(200);
-
-    const user = await getUserByEmail(payload.email);
-
     expect(typeof user).toBe("object");
-    expect(user.firstname).toBe(response.json().data.firstname);
-    expect(user.lastname).toBe(response.json().data.lastname);
-    expect(user.email).toBe(response.json().data.email);
+    expect(user.firstname).toBe(data.firstname);
+    expect(user.lastname).toBe(data.lastname);
+    expect(user.email).toBe(data.email);
+    expect(verify(data.password, user.password)).toBe(true);
   });
 
-  it("should return 200", async () => {
-    const payload = {
-      firstname: "Wren",
-      lastname: "Bilbee",
-      email: "wbilbeed@thetimes.co.uk",
-      password: "MUEkOBgo3W",
-    };
-
-    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
+  it("should update user data but not the password", async () => {
+    const { password, ...rest } = data;
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-      payload: payload,
+      payload: rest,
     });
+
+    const user = await getUserByEmail(data.email);
 
     expect(response.statusCode).toBe(200);
-
-    const user = await getUserByEmail(payload.email);
-
     expect(typeof user).toBe("object");
-    expect(user.firstname).toBe(payload.firstname);
-    expect(user.lastname).toBe(payload.lastname);
-    expect(user.email).toBe(payload.email);
-    expect(verify(payload.password, user.password)).toBe(true);
+    expect(user.firstname).toBe(data.firstname);
+    expect(user.lastname).toBe(data.lastname);
+    expect(user.email).toBe(data.email);
+    expect(verify(data.password, user.password)).toBe(false);
+    expect(verify("password", user.password)).toBe(true);
   });
 
-  it("should return 400", async () => {
-    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
+  it("should returns 400 because firstname is required", async () => {
+    const { firstname, ...rest } = data;
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-      payload: {
-        firstname: null,
-        lastname: null,
-        email: "cborsi1@biblegateway.com",
-        password: "eBDz5InlWj3",
-      },
+      payload: rest,
     });
 
     expect(response.statusCode).toBe(400);
   });
 
-  it("should return 400", async () => {
-    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
+  it("should returns 400 because lastname is required", async () => {
+    const { lastname, ...rest } = data;
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-      payload: {
-        firstname: null,
-        lastname: "Tether",
-        email: "jtether2@tinypic.com",
-        password: "t1KbIkBa9m2k",
-      },
+      payload: rest,
     });
 
     expect(response.statusCode).toBe(400);
   });
 
-  it("should return 400", async () => {
-    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
+  it("should returns 400 because email is required", async () => {
+    const { email, ...rest } = data;
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-      payload: {
-        firstname: "Berti",
-        lastname: "Sproat",
-        email: "bsproat3@amazon.com",
-        password: "FaOyik1",
-      },
+      payload: rest,
     });
 
     expect(response.statusCode).toBe(400);
   });
 
-  it("should return 400", async () => {
-    const { accessToken } = await doLogin("rtroman0@hatena.ne.jp", "password");
+  it("should returns 400 because email is incorrectly formatted", async () => {
+    const { email, ...rest } = data;
     const response = await apiCall("PUT", "/v2/me", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-      payload: {
-        firstname: "Sam",
-        lastname: "Bakeup",
-        email: null,
-        password: "Y2gceWkzIRX",
-      },
+      payload: { ...rest, email: "thisisnotanemail" },
     });
 
     expect(response.statusCode).toBe(400);

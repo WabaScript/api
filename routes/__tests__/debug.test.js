@@ -1,18 +1,21 @@
 const users = require("../../mocks/users.json");
 const prisma = require("../../lib/dbInstance");
-const { apiCall } = require("../../utils/tests");
+const { build } = require("../../app");
+const { ApiTest } = require("../../utils/tests");
 
-it("should go fine", async () => {
-  const response = await apiCall("GET", "/");
+const app = build();
+
+it("should return version", async () => {
+  const response = await new ApiTest(app).url("/").call();
   expect(response.statusCode).toBe(200);
-  expect(JSON.parse(response.body)).toHaveProperty("message");
-  expect(JSON.parse(response.body)).toHaveProperty("version");
+  expect(response.json()).toHaveProperty("message");
+  expect(response.json()).toHaveProperty("version");
 });
 
 it("should display healthcheck status", async () => {
-  const response = await apiCall("GET", "/healthcheck");
+  const response = await new ApiTest(app).url("/healthcheck").call();
   expect(response.statusCode).toBe(200);
-  expect(JSON.parse(response.body)).toMatchObject({ status: "ok" });
+  expect(response.json()).toMatchObject({ status: "ok" });
 });
 
 describe("aurora initialization", () => {
@@ -21,18 +24,18 @@ describe("aurora initialization", () => {
   });
 
   it("should be uninitialized", async () => {
-    const response = await apiCall("GET", "/status");
+    const response = await new ApiTest(app).url("/status").call();
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject({
+    expect(response.json()).toMatchObject({
       status: "uninitialized",
     });
   });
 
   it("should be initialized", async () => {
     await prisma.user.createMany({ data: users });
-    const response = await apiCall("GET", "/status");
+    const response = await new ApiTest(app).url("/status").call();
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject({
+    expect(response.json()).toMatchObject({
       status: "initialized",
     });
   });

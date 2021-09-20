@@ -1,6 +1,7 @@
 const users = require("../../mocks/users.json");
 const prisma = require("../../lib/dbInstance");
-const { apiCall } = require("../../utils/tests");
+const { build } = require("../../app");
+const { ApiTest } = require("../../utils/tests");
 
 beforeEach(async () => {
   await prisma.user.deleteMany();
@@ -9,52 +10,58 @@ beforeEach(async () => {
   await prisma.user.createMany({ data: users });
 });
 
-describe("login", () => {
+const app = build();
+
+describe("POST /auth/login", () => {
   it("should not login", async () => {
-    const response = await apiCall("POST", "/v2/auth/login", {
-      payload: {
-        email: "thisisbullshit@example.com",
-        password: "password",
-      },
-    });
+    const response = await new ApiTest(app)
+      .url("/v2/auth/login")
+      .method("post")
+      .payload({ email: "foo@bar.baz", password: "password" })
+      .call();
 
     expect(response.statusCode).toBe(401);
-    expect(JSON.parse(response.body)).toMatchObject({
+    expect(response.json()).toMatchObject({
       message: "Unauthorized",
     });
   });
 
   it("should not login", async () => {
-    const response = await apiCall("POST", "/v2/auth/login");
+    const response = await new ApiTest(app)
+      .url("/v2/auth/login")
+      .method("post")
+      .call();
 
     expect(response.statusCode).toBe(401);
-    expect(JSON.parse(response.body)).toMatchObject({
+    expect(response.json()).toMatchObject({
       message: "Unauthorized",
     });
   });
 
   it.each(users)("should login $email", async (user) => {
-    const response = await apiCall("POST", "/v2/auth/login", {
-      payload: {
-        email: user.email,
-        password: "password",
-      },
-    });
+    const response = await new ApiTest(app)
+      .url("/v2/auth/login")
+      .method("post")
+      .payload({ email: user.email, password: "password" })
+      .call();
 
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toHaveProperty("access_token");
-    expect(JSON.parse(response.body)).toHaveProperty("response_type");
-    expect(JSON.parse(response.body).response_type).toBe("jwt");
+    expect(response.json()).toHaveProperty("access_token");
+    expect(response.json()).toHaveProperty("response_type");
+    expect(response.json().response_type).toBe("jwt");
   });
 });
 
 describe("logout", () => {
   it("should logout", async () => {
-    const response = await apiCall("POST", "/v2/auth/logout");
+    const response = await new ApiTest(app)
+      .url("/v2/auth/logout")
+      .method("post")
+      .call();
 
     expect(response.statusCode).toBe(200);
     expect(response.headers["set-cookie"][0]).not.toBeNull();
-    expect(JSON.parse(response.body)).toMatchObject({
+    expect(response.json()).toMatchObject({
       message: "Logout succeded.",
     });
   });

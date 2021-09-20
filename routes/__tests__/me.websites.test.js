@@ -1,65 +1,115 @@
+const db = require("../../lib/db");
+const prisma = require("../../lib/dbInstance");
 const users = require("../../mocks/users.json");
-const websites = require("../../mocks/websites.json");
-const dbInstance = require("../../lib/dbInstance");
-const { doLogin } = require("../../jest/doLogin.js");
-const { apiCall } = require("../../jest/apiCall");
-const { truncate } = require("../../lib/mockerize.js");
-const { getUserWebsites } = require("../../lib/db");
+const { build } = require("../../app");
+const { ApiTest, AuthTest } = require("../../utils/tests");
 
-beforeAll(async () => truncate("websites"));
-afterAll(async () => dbInstance.end());
+// Question: there will be a refresh?
+beforeAll(async () => {
+  await prisma.user.deleteMany();
+  await prisma.user.createMany({ data: users });
+});
+
+const app = build();
+
+const data = {
+  name: "Renato Pozzi",
+  url: "www.renatopozzi.me",
+  is_public: true,
+};
 
 describe("POST /me/websites", () => {
-  it(`should return 401`, async () => {
-    const response = await apiCall("POST", "/v2/me/websites");
+  beforeEach(async () => prisma.website.deleteMany());
+
+  it(`should return 401 because authentication is required`, async () => {
+    const response = await new ApiTest(app)
+      .url("/v2/me/websites")
+      .method("post")
+      .call();
+
     expect(response.statusCode).toBe(401);
   });
 
-  it.each(websites)(`should return 200 $url`, async (website) => {
-    const { name, url, shared } = website;
-    const { accessToken, user } = await doLogin(
-      "rtroman0@hatena.ne.jp",
-      "password"
-    );
+  it(`should return 400 because name is required`, async () => {
+    const { name, ...rest } = data;
+    const accessToken = await new AuthTest(app).getToken();
+    const response = await new ApiTest(app)
+      .url("/v2/me/websites")
+      .method("post")
+      .payload({ ...rest })
+      .headers({ Authorization: `Bearer ${accessToken}` })
+      .call();
 
-    const response = await apiCall("POST", "/v2/me/websites", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      payload: { name, url, shared },
-    });
+    expect(response.statusCode).toBe(400);
+  });
+
+  it(`should return 400 because url is required`, async () => {
+    const { url, ...rest } = data;
+    const accessToken = await new AuthTest(app).getToken();
+    const response = await new ApiTest(app)
+      .url("/v2/me/websites")
+      .method("post")
+      .payload({ ...rest })
+      .headers({ Authorization: `Bearer ${accessToken}` })
+      .call();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it(`should create correctly a website`, async () => {
+    const { ...rest } = data;
+    const accessToken = await new AuthTest(app).getToken();
+    const response = await new ApiTest(app)
+      .url("/v2/me/websites")
+      .method("post")
+      .payload({ ...rest })
+      .headers({ Authorization: `Bearer ${accessToken}` })
+      .call();
 
     expect(response.statusCode).toBe(200);
-    expect(typeof response.json()).toBe("object");
     expect(response.json()).toHaveProperty("data");
-    expect(response.json().data).toMatchObject({
-      name: name,
-      url: url,
-      shared: shared,
-      user_id: user.id,
-    });
+    expect(response.json().data).toMatchObject(data);
+    expect(response.json().data).toHaveProperty("created_at");
+    expect(response.json().data).toHaveProperty("updated_at");
+  });
+
+  it(`should set is_public to false by default`, async () => {
+    const { is_public, ...rest } = data;
+    const accessToken = await new AuthTest(app).getToken();
+    const response = await new ApiTest(app)
+      .url("/v2/me/websites")
+      .method("post")
+      .payload({ ...rest })
+      .headers({ Authorization: `Bearer ${accessToken}` })
+      .call();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().data).toHaveProperty("is_public", false);
   });
 });
 
 describe("GET /me/websites", () => {
-  it("should return 401", async () => {
-    const response = await apiCall("GET", "/v2/me/websites", {});
+  it("should return 401 because authentication is required", async () => {
+    const response = await new ApiTest(app)
+      .url("/v2/me/websites")
+      .method("get")
+      .call();
+
     expect(response.statusCode).toBe(401);
   });
 
-  it.each(users)("should return user $email websites", async (u) => {
-    const { accessToken, user } = await doLogin(u.email, "password");
-
-    const response = await apiCall("GET", "/v2/me/websites", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+  it("should return all the owner websites", async () => {
+    const user = await new AuthTest(app).signIn();
+    const response = await new ApiTest(app)
+      .url("/v2/me/websites")
+      .method("get")
+      .headers({ Authorization: `Bearer ${user.accessToken}` })
+      .call();
 
     expect(response.statusCode).toBe(200);
-    expect(typeof response.json()).toBe("object");
     expect(response.json()).toHaveProperty("data");
-    expect(Array.isArray(response.json().data)).toBe(true);
+    expect(response.json().data).toHaveLength(1);
+    // TODO: IDs are not refreshed. Truncate is the solution?
     expect(response.json().data.every((el) => el.user_id === user.id)).toBe(
       true
     );
@@ -67,29 +117,139 @@ describe("GET /me/websites", () => {
 });
 
 describe("GET /me/websites/:wid", () => {
-  it.each([1, 3, 4, 5, 6, 8, 10, 13])("should return 401 %p", async (wid) => {
-    const response = await apiCall("GET", `/v2/me/websites/${wid}`, {});
-    expect(response.statusCode).toBe(401);
+  const ids = [1, 2, 3];
+  it.each(ids)(
+    "should return 401 because authentication is required",
+    async (id) => {
+      const response = await new ApiTest(app)
+        .url(`/v2/me/websites/${id}`)
+        .method("get")
+        .call();
+
+      expect(response.statusCode).toBe(401);
+    }
+  );
+
+  it.skip("should return 401 because the website is not owned by this user", async () => {
+    // TODO: i need to find a way to truncate the db.
   });
 
-  it.each(users)("should return 200 $email", async (u) => {
-    const { accessToken, user } = await doLogin(u.email, "password");
-    const websites = await getUserWebsites(user.id);
+  it("should return correctly the owned website", async () => {
+    const user = await new AuthTest(app).signIn();
+    const { created_at, updated_at, ...website } = (
+      await db.getUserWebsites(user.id)
+    ).shift();
+    const response = await new ApiTest(app)
+      .url(`/v2/me/websites/${website.id}`)
+      .method("get")
+      .headers({ Authorization: `Bearer ${user.accessToken}` })
+      .call();
 
-    for (const website of websites) {
-      const response = await apiCall("GET", `/v2/me/websites/${website.id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toHaveProperty("data");
+    expect(response.json().data).toMatchObject(website);
+    expect(response.json().data).toHaveProperty("created_at");
+    expect(response.json().data).toHaveProperty("updated_at");
+  });
+});
 
-      // Removed for matching.
-      const { created_at, updated_at, ...rest } = website;
+describe("PUT /me/websites/:wid", () => {
+  const ids = [1, 2, 3];
+  it.each(ids)(
+    "should return 401 because authentication is required",
+    async (id) => {
+      const response = await new ApiTest(app)
+        .url(`/v2/me/websites/${id}`)
+        .method("put")
+        .call();
 
-      expect(response.statusCode).toBe(200);
-      expect(typeof response.json()).toBe("object");
-      expect(response.json()).toHaveProperty("data");
-      expect(response.json().data).toMatchObject(rest);
+      expect(response.statusCode).toBe(401);
     }
+  );
+
+  it(`should return 400 because name is required`, async () => {
+    const { name, ...rest } = data;
+    const user = await new AuthTest(app).signIn();
+    const website = (await db.getUserWebsites(user.id)).shift();
+    const response = await new ApiTest(app)
+      .url(`/v2/me/websites/${website.id}`)
+      .method("put")
+      .payload({ ...rest })
+      .headers({ Authorization: `Bearer ${user.accessToken}` })
+      .call();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it(`should return 400 because url is required`, async () => {
+    const { url, ...rest } = data;
+    const user = await new AuthTest(app).signIn();
+    const website = (await db.getUserWebsites(user.id)).shift();
+    const response = await new ApiTest(app)
+      .url(`/v2/me/websites/${website.id}`)
+      .method("put")
+      .payload({ ...rest })
+      .headers({ Authorization: `Bearer ${user.accessToken}` })
+      .call();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it(`should set is_public to true`, async () => {
+    const { is_public, ...rest } = data;
+    const user = await new AuthTest(app).signIn();
+    const website = (await db.getUserWebsites(user.id)).shift();
+    const response = await new ApiTest(app)
+      .url(`/v2/me/websites/${website.id}`)
+      .method("put")
+      .payload({ is_public: true, ...rest })
+      .headers({ Authorization: `Bearer ${user.accessToken}` })
+      .call();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().data).toHaveProperty("is_public", true);
+  });
+
+  it(`should set name to 'Google Website'`, async () => {
+    const { name, ...rest } = data;
+    const user = await new AuthTest(app).signIn();
+    const website = (await db.getUserWebsites(user.id)).shift();
+    const response = await new ApiTest(app)
+      .url(`/v2/me/websites/${website.id}`)
+      .method("put")
+      .payload({ name: "Google Website", ...rest })
+      .headers({ Authorization: `Bearer ${user.accessToken}` })
+      .call();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().data).toHaveProperty("name", "Google Website");
+  });
+});
+
+describe("DELETE /me/websites/:wid", () => {
+  const ids = [1, 2, 3];
+  it.each(ids)(
+    "should return 401 because authentication is required",
+    async (id) => {
+      const response = await new ApiTest(app)
+        .url(`/v2/me/websites/${id}`)
+        .method("delete")
+        .call();
+
+      expect(response.statusCode).toBe(401);
+    }
+  );
+
+  it(`should delete correctly the website`, async () => {
+    const user = await new AuthTest(app).signIn();
+    const website = (await db.getUserWebsites(user.id)).shift();
+    const response = await new ApiTest(app)
+      .url(`/v2/me/websites/${website.id}`)
+      .method("delete")
+      .headers({ Authorization: `Bearer ${user.accessToken}` })
+      .call();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toHaveProperty("data", null);
   });
 });

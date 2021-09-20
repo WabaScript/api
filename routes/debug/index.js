@@ -1,5 +1,5 @@
 const pkg = require("../../package.json");
-const { getSetting } = require("../../lib/db");
+const prisma = require("../../lib/dbInstance");
 
 const debug = (fastify, _opts, done) => {
   fastify.get("/", () => {
@@ -14,13 +14,8 @@ const debug = (fastify, _opts, done) => {
   });
 
   fastify.get("/status", async () => {
-    const appInitialized = await getSetting("APP_INITIALIZED");
-
-    if (appInitialized && appInitialized.value === "YES") {
-      return { status: "initialized" };
-    }
-
-    return { status: "uninitialized" };
+    const nUsers = await prisma.user.count();
+    return nUsers > 0 ? { status: "initialized" } : { status: "uninitialized" };
   });
 
   done();

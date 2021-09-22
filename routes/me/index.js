@@ -1,4 +1,4 @@
-const { getUserById, updateUser } = require("../../lib/db");
+const db = require("../../lib/db");
 const { format } = require("../../utils/response");
 
 const opts = {
@@ -21,14 +21,14 @@ const me = (fastify, _opts, done) => {
 
   fastify.get("/", async (request) => {
     const uid = request.user.data.id;
-    const user = await getUserById(uid);
+    const user = await db.getUserById(uid);
     return format(user);
   });
 
   fastify.put("/", opts, async (request, _) => {
     const uid = request.user.data.id;
     const { password, ...rest } = request.body;
-    const user = await updateUser(uid, { ...rest }, password);
+    const user = await db.updateUser(uid, { ...rest }, password);
     return format(user, { message: "User informations updated." });
   });
 

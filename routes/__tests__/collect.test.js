@@ -1,76 +1,86 @@
-const { doLogin } = require("../../jest/doLogin.js");
-const { refreshDb } = require("../../jest/refreshDb.js");
-const { apiCall } = require("../../jest/apiCall");
-const { dbInstance } = require("../../lib/dbInstance");
+const prisma = require("../../lib/dbInstance");
+const { build } = require("../../app");
+const { ApiTest } = require("../../utils/tests");
 
-beforeAll(async () => refreshDb());
+const app = build();
 
-afterAll(async () => dbInstance.knex.destroy());
-
-describe("GET /collect", () => {
-  it("should return 404", async () => {
-    const response = await apiCall("GET", "/v2/collect");
-    expect(response.statusCode).toBe(404);
-  });
-});
+const data = {
+  type: "pageView",
+  element: "/",
+  wid: "1",
+  language: "en-GB",
+};
 
 describe("POST /collect", () => {
-  it("should return 400", async () => {
-    const response = await apiCall("POST", "/v2/collect");
+  let website;
+
+  beforeAll(async () => {
+    website = await prisma.website.create({
+      data: {
+        name: "Renato Pozzi Website",
+        url: "www.renatopozzi.me",
+        is_public: false,
+        user_id: 1,
+      },
+    });
+  });
+
+  it("should return 400 because type is required", async () => {
+    const { type, ...rest } = data;
+    const response = await new ApiTest(app)
+      .url("/v2/collect")
+      .method("post")
+      .payload({ ...rest })
+      .call();
+
     expect(response.statusCode).toBe(400);
   });
 
-  it(`should return 400`, async () => {
-    const response = await apiCall("POST", "/v2/collect", {
-      payload: {
-        element: "/",
-        language: "en-GB",
-        referrer: "",
-        seed: "this_seed_is_not_present",
-        type: "pageView",
-        fingerprint: "thisismyfp",
-      },
-    });
+  it("should return 400 because element is required", async () => {
+    const { element, ...rest } = data;
+    const response = await new ApiTest(app)
+      .url("/v2/collect")
+      .method("post")
+      .payload({ ...rest })
+      .call();
 
     expect(response.statusCode).toBe(400);
-    expect(JSON.parse(response.body)).toMatchObject({
+  });
+
+  it("should return 400 because wid is required", async () => {
+    const { wid, ...rest } = data;
+    const response = await new ApiTest(app)
+      .url("/v2/collect")
+      .method("post")
+      .payload({ ...rest })
+      .call();
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  it("should return 404 because wid does not exists", async () => {
+    const { ...rest } = data;
+    const response = await new ApiTest(app)
+      .url("/v2/collect")
+      .method("post")
+      .payload({ ...rest })
+      .call();
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toMatchObject({
       message: "Aurora ID not defined..",
     });
   });
 
-  it(`should return 200`, async () => {
-    const response = await apiCall("POST", "/v2/collect", {
-      payload: {
-        element: "/",
-        language: "en-GB",
-        referrer: "",
-        seed: "40551333ba09839f5287a7a6aa2f73fe",
-        type: "pageView",
-        fingerprint: "thisismyfp",
-      },
-    });
+  it("should collect data correctly", async () => {
+    const { wid, ...rest } = data;
+    const response = await new ApiTest(app)
+      .url("/v2/collect")
+      .method("post")
+      .payload({ wid: website.id, ...rest })
+      .call();
 
     expect(response.statusCode).toBe(200);
-  });
-});
-
-describe("POST /collect/:id", () => {
-  it.skip("should return 400", async () => {
-    const response = await apiCall("POST", "/v2/collect/thisisnotpresent");
-    expect(response.statusCode).toBe(400);
-  });
-
-  it.skip(`should return 400`, async () => {
-    const response = await apiCall("POST", "/v2/collect/id", {
-      payload: {
-        seed: "this_seed_is_not_present",
-        duration: 1000,
-      },
-    });
-
-    expect(response.statusCode).toBe(400);
-    expect(JSON.parse(response.body)).toMatchObject({
-      message: "Aurora ID not defined..",
-    });
+    expect(response.json()).toHaveProperty("data");
   });
 });

@@ -27,13 +27,13 @@ CREATE TABLE "websites" (
 -- CreateTable
 CREATE TABLE "events" (
     "id" TEXT NOT NULL,
-    "type" TEXT NOT NULL,
+    "type" TEXT NOT NULL DEFAULT E'pageview',
     "element" TEXT NOT NULL,
-    "referrer" TEXT NOT NULL,
-    "duration" DECIMAL(65,30) NOT NULL,
+    "referrer" TEXT,
+    "duration" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
     "device" TEXT NOT NULL,
     "locale" TEXT NOT NULL,
-    "website_id" INTEGER NOT NULL,
+    "website_id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -59,3 +59,15 @@ CREATE TABLE "metadata" (
 
     CONSTRAINT "metadata_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+-- AddForeignKey
+ALTER TABLE "websites" ADD CONSTRAINT "websites_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "event_metadata" ADD CONSTRAINT "event_metadata_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "events"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "event_metadata" ADD CONSTRAINT "event_metadata_metadata_id_fkey" FOREIGN KEY ("metadata_id") REFERENCES "metadata"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -9,7 +9,7 @@ const parse = (ua) => {
   if (parsed.browser && parsed.browser.name && parsed.browser.version) {
     elements.push({
       type: "browser",
-      name: parsed.browser.name,
+      value: parsed.browser.name,
       version: parsed.browser.version,
     });
   }
@@ -17,7 +17,7 @@ const parse = (ua) => {
   if (parsed.os && parsed.os.name && parsed.os.version) {
     elements.push({
       type: "os",
-      name: parsed.os.name,
+      value: parsed.os.name,
       version: parsed.os.version,
     });
   }
@@ -25,7 +25,7 @@ const parse = (ua) => {
   if (parsed.engine && parsed.engine.name && parsed.engine.version) {
     elements.push({
       type: "engine",
-      name: parsed.engine.name,
+      value: parsed.engine.name,
       version: parsed.engine.version,
     });
   }

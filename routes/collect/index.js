@@ -30,7 +30,9 @@ const collect = (fastify, _opts, done) => {
     const locale = tag(request.body.language);
 
     const metadata = [];
-    for (const element in ua.elements) {
+    for (const index in ua.elements) {
+      const element = ua.elements[index];
+
       let meta = await prisma.metadata.findFirst({
         where: { ...element },
       });

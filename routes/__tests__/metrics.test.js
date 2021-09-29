@@ -1,137 +1,117 @@
-const { doLogin } = require("../../jest/doLogin.js");
-const { apiCall } = require("../../jest/apiCall");
-const { dbInstance } = require("../../lib/dbInstance");
+const prisma = require("../../lib/dbInstance");
+const users = require("../../mocks/users.json");
+const websites = require("../../mocks/websites.json");
+const { build } = require("../../app");
+const { ApiTest, AuthTest } = require("../../utils/tests");
+const { createWebsite } = require("../../lib/db");
 
-beforeAll(async () => {
-  await dbInstance.knex.migrate.rollback();
-  await dbInstance.knex.migrate.latest();
+const app = build();
 
-  await dbInstance.knex("users").del();
-  await dbInstance.knex("users").insert({
-    firstname: "Renato",
-    lastname: "Pozzi",
-    email: "info@renatopozzi.me",
-    password: "$2a$10$7AtT.hJHqS.o9alESCm70OTMy5/3nNztt3vDoqgjwKxK9CZieCmZm",
-  });
-
-  await dbInstance.knex("websites").del();
-  await dbInstance.knex("websites").insert({
-    name: "Renato Pozzi Website.",
-    url: "https://renatopozzi.me",
-    seed: "40551333ba09839f5287a7a6aa2f73fe",
-    shared: false,
-    user_id: 1,
-  });
-  await dbInstance.knex("websites").insert({
-    name: "My Shared Website.",
-    url: "https://mysharedwebsite.come",
-    seed: "znz29v2gikf6ni3cytfeapp4t28h69jx",
-    shared: true,
-    user_id: 1,
-  });
+beforeEach(async () => {
+  await prisma.user.deleteMany();
+  await prisma.website.deleteMany();
+  await prisma.user.createMany({ data: users });
 });
 
-afterAll(async () => dbInstance.knex.destroy());
+// http://analytics.renatopozzi.me/v2/metrics?seed=DI3F2JDSKAK&resource=browsers&start=1929301842&end=249050050
 
-describe.each(["browser", "country", "os", "page", "referrer", "series"])(
-  "Different Targets",
-  (target) => {
-    it("should return 404", async () => {
-      const seed = "this_not_exists";
-      const response = await apiCall(
-        "GET",
-        `/v2/metrics/${seed}/views/${target}`
-      );
-      expect(response.statusCode).toBe(404);
+describe("GET /v2/metrics", () => {
+  beforeEach(async () => {
+    await prisma.website.deleteMany();
+  });
+
+  it("should return 404 because the seed does not exits", async () => {
+    const response = await new ApiTest(app)
+      .url("/v2/metrics?seed=thisisntexists")
+      .method("get")
+      .call();
+
+    expect(response.statusCode).toBe(404);
+  });
+
+  it("should return 401 because website is private and user is not authenticated", async () => {
+    const website = await createWebsite({
+      name: "Foo Website",
+      url: "https://foo.bar",
+      user_id: 1,
+      is_public: false,
     });
 
-    describe("Not Shared Website", () => {
-      const seed = "40551333ba09839f5287a7a6aa2f73fe";
+    const response = await new ApiTest(app)
+      .url(`/v2/metrics?seed=${website.id}`)
+      .method("get")
+      .call();
 
-      it("should return 401", async () => {
-        const response = await apiCall(
-          "GET",
-          `/v2/metrics/${seed}/views/${target}`
-        );
-        expect(response.statusCode).toBe(401);
-      });
+    expect(response.statusCode).toBe(401);
+  });
 
-      it("should return 200", async () => {
-        const accessToken = await doLogin("info@renatopozzi.me", "password");
-        const response = await apiCall(
-          "GET",
-          `/v2/metrics/${seed}/views/${target}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        expect(response.statusCode).toBe(200);
-      });
-
-      describe.each(["day", "week", "month", "year"])(
-        "Different Ranges",
-        (range) => {
-          it(`should return 200 ${range}`, async () => {
-            const accessToken = await doLogin(
-              "info@renatopozzi.me",
-              "password"
-            );
-            const response = await apiCall(
-              "GET",
-              `/v2/metrics/${seed}/views/${target}?range=${range}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                },
-              }
-            );
-
-            expect(response.statusCode).toBe(200);
-          });
-        }
-      );
-
-      it("should return 400", async () => {
-        const accessToken = await doLogin("info@renatopozzi.me", "password");
-        const response = await apiCall(
-          "GET",
-          `/v2/metrics/${seed}/views/${target}?range=dummy`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        expect(response.statusCode).toBe(400);
-      });
+  it("should return 200 because website is public and user is not authenticated", async () => {
+    const website = await createWebsite({
+      name: "Foo Website",
+      url: "https://foo.bar",
+      user_id: 1,
+      is_public: true,
     });
 
-    describe("Shared Website", () => {
-      const seed = "znz29v2gikf6ni3cytfeapp4t28h69jx";
+    const response = await new ApiTest(app)
+      .url(`/v2/metrics?seed=${website.id}`)
+      .method("get")
+      .call();
 
-      it("should return 200", async () => {
-        const response = await apiCall(
-          "GET",
-          `/v2/metrics/${seed}/views/${target}`
-        );
-        expect(response.statusCode).toBe(200);
-      });
+    expect(response.statusCode).toBe(200);
+  });
 
-      describe.each(["day", "week", "month", "year"])(
-        "Different Ranges",
-        (range) => {
-          it(`should return 200 ${range}`, async () => {
-            const response = await apiCall(
-              "GET",
-              `/v2/metrics/${seed}/views/${target}?range=${range}`
-            );
-
-            expect(response.statusCode).toBe(200);
-          });
-        }
-      );
+  it("should return 401 because website is private and user is authenticated but does not own it", async () => {
+    const user = await new AuthTest(app).signIn();
+    const website = await createWebsite({
+      name: "Foo Website",
+      url: "https://foo.bar",
+      user_id: 2,
+      is_public: false,
     });
-  }
-);
+
+    const response = await new ApiTest(app)
+      .url(`/v2/metrics?seed=${website.id}`)
+      .headers({ Authorization: `Bearer ${user.accessToken}` })
+      .method("get")
+      .call();
+
+    expect(response.statusCode).toBe(401);
+  });
+
+  it("should return 200 because website is private and user is authenticated and owns it", async () => {
+    const user = await new AuthTest(app).signIn();
+    const website = await createWebsite({
+      name: "Foo Website",
+      url: "https://foo.bar",
+      user_id: user.id,
+      is_public: false,
+    });
+
+    const response = await new ApiTest(app)
+      .url(`/v2/metrics?seed=${website.id}`)
+      .headers({ Authorization: `Bearer ${user.accessToken}` })
+      .method("get")
+      .call();
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("should return correctly the events for a website", async () => {
+    const user = await new AuthTest(app).signIn();
+    const website = await createWebsite({
+      name: "Foo Website",
+      url: "https://foo.bar",
+      user_id: user.id,
+      is_public: false,
+    });
+
+    const response = await new ApiTest(app)
+      .url(`/v2/metrics?seed=${website.id}`)
+      .headers({ Authorization: `Bearer ${user.accessToken}` })
+      .method("get")
+      .call();
+
+    expect(response.statusCode).toBe(200);
+  });
+});

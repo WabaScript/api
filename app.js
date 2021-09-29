@@ -13,7 +13,7 @@ const { auth } = require("./routes/auth");
 const { me } = require("./routes/me");
 const { websites } = require("./routes/me/websites");
 const { collect } = require("./routes/collect");
-// const { metrics } = require("./routes/metrics");
+const { metrics } = require("./routes/metrics");
 // const { initialize } = require("./routes/initialize");
 const { AUTH_COOKIE } = require("./utils/constants");
 
@@ -52,7 +52,7 @@ const build = (opts = {}) => {
   // app.register(initialize, { prefix: "/v2" });
   app.register(collect, { prefix: "/v2" });
   app.register(me, { prefix: "/v2/me" });
-  // app.register(metrics, { prefix: "/v2/metrics" });
+  app.register(metrics, { prefix: "/v2/metrics" });
   app.register(websites, { prefix: "/v2/me" });
   app.register(auth, { prefix: "/v2/auth" });
 
